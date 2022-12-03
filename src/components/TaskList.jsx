@@ -1,13 +1,17 @@
-import { TITLE, ID, formatTime } from "../utils/utils";
+import { ID, formatTime, elapsedTime, isStopped, totalElapsedTime } from "../utils/utils";
 import { Button, Stack, InputGroup, Form } from "react-bootstrap";
 import { useState } from "react";
-import { useElapsedTime } from "use-elapsed-time";
 import _ from 'lodash'
+import { useEffect } from "react";
 
 export function TaskList({ tasks, onToggleStatus }) {
     return (
-        <div>
-            {tasks.map(task => (
+        <div >
+            <div className='mb-1'>
+                <Stats
+                    tasks={tasks} />
+            </div>
+            {tasks.map((task, i) => (
                 <SingleTask
                     key={task[ID]}
                     task={task}
@@ -18,21 +22,49 @@ export function TaskList({ tasks, onToggleStatus }) {
     )
 }
 
-export function SingleTask({ task, onToggleStatus }) {
-    const { id, title, start, stopped } = task
-    const [editing, setEditing] = useState(false)
-    const [value, setValue] = useState(title)
-    const { elapsedTime } = useElapsedTime({
-        isPlaying: !stopped,
-        startAt: _.now() - start,
-    })
+function Stats({ tasks }) {
+    const [totalElapsed, setTotalElapsed] = useState(0)
+    useEffect(() => {
+        if (_.every(tasks, isStopped)) {
+            // all stooped 
+            return setTotalElapsed(totalElapsedTime(tasks))
+        } else {
+            const interval = setInterval(() => {
+                setTotalElapsed(totalElapsedTime(tasks))
+            }, 1000);
+            return () => clearInterval(interval)
+        }
+    }, [tasks])
 
+    return (<Stack direction="horizontal" gap={1}>
+        <div className="bg-success border rounded p-1">{_.size(_.filter(tasks, isStopped))} Done</div>
+        <div className="bg-warning border rounded p-1">{_.size(_.filter(tasks, _.negate(isStopped)))} Running</div>
+        <div className="bg-info border rounded p-1">total elapsed: {formatTime(totalElapsed)} </div>
+    </Stack>)
+}
+
+function SingleTask({ task, onToggleStatus }) {
+    const [editing, setEditing] = useState(false)
+    const [value, setValue] = useState(task.title)
+    const [elapsed, setElapsed] = useState(0)
+
+    useEffect(() => {
+        if (isStopped(task)) {
+            setElapsed(elapsedTime(task))
+        } else {
+            // timer 
+            const interval = setInterval(() => {
+                setElapsed(elapsedTime(task))
+            }, 1000);
+            return () => clearInterval(interval)
+        }
+    }, [task])
 
     return (
         <InputGroup className="mb-3">
-            <Button className={`${stopped ? 'btn-success' : 'btn-danger'}`}
-                onClick={() => onToggleStatus(id)}>
-                {formatTime(elapsedTime.toFixed(0))}
+            <Button className={`${isStopped(task) ? 'btn-success' : 'btn-warning'}`}
+                onClick={() => onToggleStatus(task.id)}>
+                {formatTime(elapsed)}
             </Button>
             <Form.Control
                 value={value}
