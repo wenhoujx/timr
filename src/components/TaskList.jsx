@@ -11,12 +11,14 @@ export function TaskList({ tasks, onToggleStatus }) {
                 <Stats
                     tasks={tasks} />
             </div>
-            {tasks.map((task, i) => (
-                <SingleTask
-                    key={task[ID]}
-                    task={task}
-                    onToggleStatus={onToggleStatus}
-                />
+            {tasks.map((task) => (
+                <div className="mb-1">
+                    <SingleTask
+                        key={task[ID]}
+                        task={task}
+                        onToggleStatus={onToggleStatus}
+                    />
+                </div>
             ))}
         </div>
     )
@@ -37,9 +39,8 @@ function Stats({ tasks }) {
     }, [tasks])
 
     return (<Stack direction="horizontal" gap={1}>
-        <div className="bg-success border rounded p-1">{_.size(_.filter(tasks, isStopped))} Done</div>
-        <div className="bg-warning border rounded p-1">{_.size(_.filter(tasks, _.negate(isStopped)))} Running</div>
-        <div className="bg-info border rounded p-1">total elapsed: {formatTime(totalElapsed)} </div>
+        <div className="bg-success border rounded p-2">{_.size(_.filter(tasks, isStopped))} Done</div>
+        <div className="bg-warning border rounded p-2">{_.size(_.filter(tasks, _.negate(isStopped)))} Running: {formatTime(totalElapsed)}</div>
     </Stack>)
 }
 
@@ -61,7 +62,7 @@ function SingleTask({ task, onToggleStatus }) {
     }, [task])
 
     return (
-        <InputGroup className="mb-3">
+        <InputGroup>
             <Button className={`${isStopped(task) ? 'btn-success' : 'btn-warning'}`}
                 onClick={() => onToggleStatus(task.id)}>
                 {formatTime(elapsed)}
