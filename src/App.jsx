@@ -1,12 +1,18 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Container } from 'react-bootstrap'
 import { NewTask } from './components/NewTask'
 import { toggleTask, newTask } from './utils/utils'
 import _ from 'lodash'
 import { TaskList } from './components/TaskList'
 
+const TASKS = 'tasks'
 function App() {
-  const [tasks, setTasks] = useState([])
+  const [tasks, setTasks] = useState(JSON.parse(localStorage.getItem(TASKS)) || [])
+
+  useEffect(() => {
+    localStorage.setItem(TASKS, JSON.stringify(tasks))
+  }, [tasks])
+  
   const addTask = (taskTitle) => {
     setTasks((state) => (_.concat(tasks, [newTask(taskTitle)])))
   }

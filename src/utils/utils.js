@@ -59,7 +59,6 @@ export function newTask(task) {
 }
 
 export function elapsedTime(task) {
-    console.log(JSON.stringify(task))
     return _.sum(_.map(task.durations, dur => {
         if (dur.elapsed) {
             return dur.elapsed

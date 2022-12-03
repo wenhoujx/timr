@@ -12,9 +12,8 @@ export function TaskList({ tasks, onToggleStatus }) {
                     tasks={tasks} />
             </div>
             {tasks.map((task) => (
-                <div className="mb-1">
+                <div className="mb-1" key={task[ID]}>
                     <SingleTask
-                        key={task[ID]}
                         task={task}
                         onToggleStatus={onToggleStatus}
                     />
@@ -39,8 +38,8 @@ function Stats({ tasks }) {
     }, [tasks])
 
     return (<Stack direction="horizontal" gap={1}>
-        <div className="bg-success border rounded p-2">{_.size(_.filter(tasks, isStopped))} Done</div>
-        <div className="bg-warning border rounded p-2">{_.size(_.filter(tasks, _.negate(isStopped)))} Running: {formatTime(totalElapsed)}</div>
+        <div className="bg-success border rounded p-1">{_.size(_.filter(tasks, isStopped))} Done</div>
+        <div className="bg-warning border rounded p-1">{_.size(_.filter(tasks, _.negate(isStopped)))} Running: {formatTime(totalElapsed)}</div>
     </Stack>)
 }
 
