@@ -1,6 +1,9 @@
-import { TITLE, ID } from "../utils/utils";
+import { TITLE, ID, formatTime } from "../utils/utils";
 import { Button, Stack, InputGroup, Form } from "react-bootstrap";
 import { useState } from "react";
+import { useElapsedTime } from "use-elapsed-time";
+import _ from 'lodash'
+
 export function TaskList({ tasks, onToggleStatus }) {
     return (
         <div>
@@ -19,14 +22,17 @@ export function SingleTask({ task, onToggleStatus }) {
     const { id, title, start, stopped } = task
     const [editing, setEditing] = useState(false)
     const [value, setValue] = useState(title)
+    const { elapsedTime } = useElapsedTime({
+        isPlaying: !stopped,
+        startAt: _.now() - start,
+    })
 
 
     return (
         <InputGroup className="mb-3">
             <Button className={`${stopped ? 'btn-success' : 'btn-danger'}`}
-            style={{width: '40px'}}
                 onClick={() => onToggleStatus(id)}>
-                {stopped ? '\u{2713}' : '⤾'}
+                {formatTime(elapsedTime.toFixed(0))}
             </Button>
             <Form.Control
                 value={value}
