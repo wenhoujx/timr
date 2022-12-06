@@ -12,9 +12,12 @@ function App() {
   useEffect(() => {
     localStorage.setItem(TASKS, JSON.stringify(tasks))
   }, [tasks])
-  
+
   const addTask = (taskTitle) => {
     setTasks((state) => (_.concat(tasks, [newTask(taskTitle)])))
+  }
+  const removeTask = (id) => {
+    setTasks(prev => (_.filter(tasks, t => t.id !== id)))
   }
 
   const toggleStatus = (id) => {
@@ -33,6 +36,7 @@ function App() {
         <TaskList
           tasks={tasks}
           onToggleStatus={toggleStatus}
+          removeTask={removeTask}
         />
       </div>
     </Container>

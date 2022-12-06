@@ -1,10 +1,10 @@
 import { ID, formatTime, elapsedTime, isStopped, totalElapsedTime } from "../utils/utils";
 import { Button, Stack, InputGroup, Form } from "react-bootstrap";
 import { useState } from "react";
-import _ from 'lodash'
+import _, { remove } from 'lodash'
 import { useEffect } from "react";
 
-export function TaskList({ tasks, onToggleStatus }) {
+export function TaskList({ tasks, onToggleStatus, removeTask  }) {
     return (
         <div >
             <div className='mb-1'>
@@ -16,6 +16,7 @@ export function TaskList({ tasks, onToggleStatus }) {
                     <SingleTask
                         task={task}
                         onToggleStatus={onToggleStatus}
+                        removeTask={removeTask}
                     />
                 </div>
             ))}
@@ -43,7 +44,7 @@ function Stats({ tasks }) {
     </Stack>)
 }
 
-function SingleTask({ task, onToggleStatus }) {
+function SingleTask({ task, onToggleStatus, removeTask }) {
     const [editing, setEditing] = useState(false)
     const [value, setValue] = useState(task.title)
     const [elapsed, setElapsed] = useState(0)
@@ -72,6 +73,8 @@ function SingleTask({ task, onToggleStatus }) {
                 onKeyDown={e => e.key === 'Enter' && setEditing(!editing)}
                 readOnly={!editing}
             />
+            <Button className="btn-danger"
+            onClick={() => removeTask(task.id)}>x</Button>
         </InputGroup>
 
     )
