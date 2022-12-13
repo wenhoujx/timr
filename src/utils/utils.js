@@ -10,10 +10,16 @@ export const END = 'end'
 
 function startDuration() {
     return {
+        // hack so that new task are sorted at the top :(
         start: now_in_seconds(),
         end: null,
         elapsed: null
     }
+}
+
+export function lastUpdated(task) {
+    const lastDuration = _.last(task.durations)
+    return lastDuration.end ? lastDuration.end : now_in_seconds()
 }
 
 export function isStopped(task) {
@@ -49,7 +55,8 @@ export function endTask(task) {
             } else {
                 return {
                     ...dur,
-                    end: now,
+                    // so that the newly added are added to the top. 
+                    end: now, 
                     elapsed: now - dur.start
                 }
             }

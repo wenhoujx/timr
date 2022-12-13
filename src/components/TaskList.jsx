@@ -1,13 +1,16 @@
-import { ID, formatTime, elapsedTime, isStopped } from "../utils/utils";
+import { ID, formatTime, elapsedTime, isStopped, lastUpdated } from "../utils/utils";
 import { Button, InputGroup, Form } from "react-bootstrap";
 import { useState } from "react";
-import _ from 'lodash'
+import _, { last } from 'lodash'
 import { useEffect } from "react";
 
 export function TaskList({ tasks, onToggleStatus, removeTask, updateTaskTitle }) {
+    // make sure the last updated one is on top. 
+    const sortedTasks = _.sortBy(_.toPairs(tasks), ([id, task]) => isStopped(task) ? lastUpdated(task) : 0)
+
     return (
         <div>
-            {_.map(tasks, (task, id) => (
+            {_.map(sortedTasks, ([id, task]) => (
                 <div className="mb-1" key={id}>
                     <SingleTask
                         taskId={id}
@@ -24,7 +27,6 @@ export function TaskList({ tasks, onToggleStatus, removeTask, updateTaskTitle })
 
 function SingleTask({ taskId, task, onToggleStatus, removeTask, updateTaskTitle }) {
     const [editing, setEditing] = useState(false)
-    const [value, setValue] = useState(task.title)
     const [elapsed, setElapsed] = useState(0)
 
     useEffect(() => {

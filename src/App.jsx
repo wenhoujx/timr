@@ -22,8 +22,8 @@ function reducer(state, action) {
       return {
         ...state,
         tasks: {
-          [_.uniqueId()]: newTask(action.payload.title),
           ..._.mapValues(state.tasks, endTask),
+          [_.uniqueId()]: newTask(action.payload.title),
         }
       }
     case (ACTIONS.REMOVE_TASK):
