@@ -1,22 +1,20 @@
-import { ID, formatTime, elapsedTime, isStopped, totalElapsedTime } from "../utils/utils";
-import { Button, Stack, InputGroup, Form } from "react-bootstrap";
+import { ID, formatTime, elapsedTime, isStopped } from "../utils/utils";
+import { Button, InputGroup, Form } from "react-bootstrap";
 import { useState } from "react";
-import _, { remove } from 'lodash'
+import _ from 'lodash'
 import { useEffect } from "react";
 
-export function TaskList({ tasks, onToggleStatus, removeTask  }) {
+export function TaskList({ tasks, onToggleStatus, removeTask, updateTaskTitle }) {
     return (
-        <div >
-            <div className='mb-1'>
-                <Stats
-                    tasks={tasks} />
-            </div>
-            {tasks.map((task) => (
-                <div className="mb-1" key={task[ID]}>
+        <div>
+            {_.map(tasks, (task, id) => (
+                <div className="mb-1" key={id}>
                     <SingleTask
+                        taskId={id}
                         task={task}
                         onToggleStatus={onToggleStatus}
                         removeTask={removeTask}
+                        updateTaskTitle={updateTaskTitle}
                     />
                 </div>
             ))}
@@ -24,27 +22,7 @@ export function TaskList({ tasks, onToggleStatus, removeTask  }) {
     )
 }
 
-function Stats({ tasks }) {
-    const [totalElapsed, setTotalElapsed] = useState(0)
-    useEffect(() => {
-        if (_.every(tasks, isStopped)) {
-            // all stooped 
-            return setTotalElapsed(totalElapsedTime(tasks))
-        } else {
-            const interval = setInterval(() => {
-                setTotalElapsed(totalElapsedTime(tasks))
-            }, 1000);
-            return () => clearInterval(interval)
-        }
-    }, [tasks])
-
-    return (<Stack direction="horizontal" gap={1}>
-        <div className="bg-success border rounded p-1">{_.size(_.filter(tasks, isStopped))} Done</div>
-        <div className="bg-warning border rounded p-1">{_.size(_.filter(tasks, _.negate(isStopped)))} Running: {formatTime(totalElapsed)}</div>
-    </Stack>)
-}
-
-function SingleTask({ task, onToggleStatus, removeTask }) {
+function SingleTask({ taskId, task, onToggleStatus, removeTask, updateTaskTitle }) {
     const [editing, setEditing] = useState(false)
     const [value, setValue] = useState(task.title)
     const [elapsed, setElapsed] = useState(0)
@@ -64,17 +42,18 @@ function SingleTask({ task, onToggleStatus, removeTask }) {
     return (
         <InputGroup>
             <Button className={`${isStopped(task) ? 'btn-success' : 'btn-warning'}`}
-                onClick={() => onToggleStatus(task.id)}>
+                onClick={() => onToggleStatus(taskId)}>
                 {formatTime(elapsed)}
             </Button>
             <Form.Control
-                value={value}
-                onChange={e => setValue(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && setEditing(!editing)}
+                value={task.title}
+                onChange={e => updateTaskTitle(taskId, e.target.value)}
+                onClick={() => setEditing(true)}
+                // onKeyDown={e => e.key === 'enter' && setEditing(false)}
                 readOnly={!editing}
             />
             <Button className="btn-danger"
-            onClick={() => removeTask(task.id)}>x</Button>
+                onClick={() => removeTask(taskId)}>x</Button>
         </InputGroup>
 
     )

@@ -19,17 +19,27 @@ function startDuration() {
 export function isStopped(task) {
     return _.every(task.durations, dur => !_.isNull(dur.end))
 }
+
+export function updateTaskTitle(task, newTitle) {
+    return {
+        ...task,
+        title: newTitle,
+    }
+}
+
+
 export function toggleTask(task) {
     if (isStopped(task)) {
         return {
-            ...task, 
-            durations: [...task.durations, startDuration()]
+            ...task,
+            durations: [...task.durations, startDuration()],
         }
     } else {
         return endTask(task)
     }
 }
-function endTask(task) {
+
+export function endTask(task) {
     const now = now_in_seconds()
     return {
         ...task,
@@ -44,13 +54,11 @@ function endTask(task) {
                 }
             }
         })
-
     }
 }
 
 export function newTask(task) {
     return {
-        id: _.uniqueId(),
         title: task,
         durations: [
             startDuration()
