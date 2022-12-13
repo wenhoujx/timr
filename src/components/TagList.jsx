@@ -19,9 +19,9 @@ export function TagList({ tags, addTag }) {
             />
             <ListGroup>
                 {_.map(tags, (tagValue, tag) => (
-                    <ListGroupItem key={tag}>
-                        {tag}
-                        <Button className='pull-right'>x</Button>
+                    <ListGroupItem key={tag} className='d-flex align-items-center'>
+                        <span >{tag}</span>
+                        <Button className='ms-auto'>x</Button>
                     </ListGroupItem>
                 ))}
             </ListGroup>
