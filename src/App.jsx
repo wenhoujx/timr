@@ -31,7 +31,10 @@ function reducer(state, action) {
         tags: _.includes(_.keys(state.tags), newTag) ? state.tags : { ...state.tags, [newTag]: {} }
       }
     case (ACTIONS.REMOVE_TAG):
-      return {}
+      return {
+        ...state,
+        tags: _.omit(state.tags, [action.payload.tag])
+      }
     case (ACTIONS.UPDATE_TAG):
       return {}
     case (ACTIONS.ADD_TASK_TAG):
@@ -102,6 +105,7 @@ function App() {
           <TagList
             tags={state.tags}
             addTag={tag => dispatch({ type: ACTIONS.ADD_TAG, payload: { tag } })}
+            removeTag={tag => dispatch({ type: ACTIONS.REMOVE_TAG, payload: { tag } })}
           />
         </Col>
       </Row>
