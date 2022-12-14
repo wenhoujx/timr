@@ -1,11 +1,14 @@
 import _ from 'lodash'
 import { useState } from 'react'
-import { Button, FormControl, ListGroup, ListGroupItem } from "react-bootstrap"
+import { Badge, Button, FormControl, ListGroup, ListGroupItem } from "react-bootstrap"
 
 export function TagList({ tags, addTag, removeTag }) {
     const [value, setValue] = useState('')
     const addNewTag = () => {
-        console.log(value)
+        if (_.isEmpty(value)) {
+            return 
+        } 
+
         addTag(value)
         setValue("")
     }
@@ -23,13 +26,7 @@ export function TagList({ tags, addTag, removeTag }) {
                         key={tag}
                         className='d-flex align-items-center p-0 bg-info rounded me-auto'>
                         <span className='px-1'>{tag}</span>
-                        <Button
-                            onClick={() => removeTag(tag)}
-                            className='ms-auto'
-                            variant='danger'
-                            size='sm'>
-                            x
-                        </Button>
+                        <Badge onClick={() => removeTag(tag)}>x</Badge>
                     </ListGroupItem>
                 ))}
             </ListGroup>

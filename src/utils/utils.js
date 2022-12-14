@@ -45,6 +45,13 @@ export function toggleTask(task) {
     }
 }
 
+export function removeTag(task, tag) {
+    return {
+        ...task,
+        tags: _.omit(task.tags, [tag])
+    }
+}
+
 export function endTask(task) {
     const now = now_in_seconds()
     return {
@@ -56,11 +63,18 @@ export function endTask(task) {
                 return {
                     ...dur,
                     // so that the newly added are added to the top. 
-                    end: now, 
+                    end: now,
                     elapsed: now - dur.start
                 }
             }
         })
+    }
+}
+
+export function addTaskTag(task, tag) {
+    return {
+        ...task,
+        tags: _.uniq([...task.tags, tag])
     }
 }
 
@@ -69,7 +83,8 @@ export function newTask(task) {
         title: task,
         durations: [
             startDuration()
-        ]
+        ],
+        tags: []
     }
 }
 

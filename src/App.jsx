@@ -1,7 +1,7 @@
 import { useState, useEffect, useReducer } from 'react'
 import { Col, Container, Row } from 'react-bootstrap'
 import { NewTask } from './components/NewTask'
-import { toggleTask as toggleTaskStatus, newTask, updateTaskTitle, endTask } from './utils/utils'
+import { toggleTask as toggleTaskStatus, newTask, updateTaskTitle, endTask, addTaskTag } from './utils/utils'
 import _ from 'lodash'
 import { TaskList } from './components/TaskList'
 import { TagList } from './components/TagList'
@@ -33,12 +33,22 @@ function reducer(state, action) {
     case (ACTIONS.REMOVE_TAG):
       return {
         ...state,
+        tasks: {
+          ..._.mapValues(state.tasks, remove_tag(action.payload.tag))
+        }, 
         tags: _.omit(state.tags, [action.payload.tag])
       }
     case (ACTIONS.UPDATE_TAG):
       return {}
     case (ACTIONS.ADD_TASK_TAG):
-      return {}
+      const taskId = action.payload.id
+      return {
+        ...state,
+        tasks: {
+          ...state.tasks,
+          [taskId]: addTaskTag(state.tasks[taskId], action.payload.tag)
+        }
+      }
     case (ACTIONS.REMOVE_TASK_TAG):
       return {}
     case (ACTIONS.ADD_TASK):
@@ -93,6 +103,12 @@ function App() {
           <div>
             <TaskList
               tasks={state.tasks}
+              allTags={state.tags}
+              addTaskTag={(id, tag) => dispatch({
+                type: ACTIONS.ADD_TASK_TAG, payload: {
+                  id, tag
+                }
+              })}
               onToggleStatus={id => dispatch({ type: ACTIONS.TOGGLE_TASK_STATUS, payload: { id } })}
               removeTask={id => dispatch({ type: ACTIONS.REMOVE_TASK, payload: { id } })}
               updateTaskTitle={(id, title) => dispatch({
