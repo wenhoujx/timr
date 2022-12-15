@@ -6,21 +6,19 @@ export function NewTask({ addTask }) {
     const [value, setValue] = useState("")
     const handleClick = () => {
         if (_.isEmpty(value)) {
-            return 
-        } 
+            return
+        }
         addTask(value)
         setValue("")
     }
     return (<InputGroup>
-        <Button 
-        className="btn-success"
-        onClick={handleClick}>
-            Go!
-        </Button>
+        <Button
+            className="btn-success bi-play-fill"
+            onClick={handleClick} />
         <Form.Control
             placeholder="what's your plan?"
             onChange={(e) => setValue(e.target.value)}
-            onKeyDown={(e) => {e.key === 'Enter' && handleClick()}}
+            onKeyDown={(e) => { e.key === 'Enter' && handleClick() }}
             value={value}
         />
     </InputGroup>)

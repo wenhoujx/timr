@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { Form, Offcanvas, } from "react-bootstrap";
 
-export function TaskTags({ allTags, task, show, closeShow, addTaskTag, removeTaskTag }) {
+export function TaskDetails({ allTags, task, show, closeShow, addTaskTag, removeTaskTag }) {
     return (
         task &&
         <Offcanvas show={show} onHide={() => closeShow()} placement='end'>

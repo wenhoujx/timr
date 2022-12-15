@@ -4,7 +4,7 @@ import { useState } from "react";
 import _, { remove } from 'lodash'
 import { useEffect } from "react";
 
-export function TaskList({ tasks, showTags, onToggleStatus, removeTask, updateTaskTitle }) {
+export function TaskList({ tasks, showDetails, onToggleStatus, removeTask, updateTaskTitle }) {
     // make sure the last updated one is on top. 
     const sortedTasks = _.sortBy(tasks, (task) => isStopped(task) ? lastUpdated(task) : 0)
     return (
@@ -13,7 +13,7 @@ export function TaskList({ tasks, showTags, onToggleStatus, removeTask, updateTa
                 <div className="mb-1" key={task.id}>
                     <SingleTask
                         task={task}
-                        showTags={showTags}
+                        showDetails={showDetails}
                         onToggleStatus={onToggleStatus}
                         removeTask={removeTask}
                         updateTaskTitle={updateTaskTitle}
@@ -24,7 +24,7 @@ export function TaskList({ tasks, showTags, onToggleStatus, removeTask, updateTa
     )
 }
 
-function SingleTask({ task, showTags, onToggleStatus, removeTask, updateTaskTitle }) {
+function SingleTask({ task, showDetails, onToggleStatus, removeTask, updateTaskTitle }) {
     const [editing, setEditing] = useState(false)
     const [elapsed, setElapsed] = useState(0)
 
@@ -43,7 +43,7 @@ function SingleTask({ task, showTags, onToggleStatus, removeTask, updateTaskTitl
     return (
         <div>
             <InputGroup>
-                <Button className={`${isStopped(task) ? 'btn-success' : 'btn-warning'}`}
+                <Button className={`${isStopped(task) ? 'btn-success' : 'btn-warning bi-stopwatch-fill'}`}
                     onClick={() => onToggleStatus(task.id)}>
                     {formatTime(elapsed)}
                 </Button>
@@ -54,7 +54,7 @@ function SingleTask({ task, showTags, onToggleStatus, removeTask, updateTaskTitl
                     readOnly={!editing}
                 />
 
-                <Button onClick={() => showTags(task.id)}>#</Button>
+                <Button onClick={() => showDetails(task.id)}>#</Button>
                 <Button variant="danger" onClick={() => removeTask(task.id)}><i className="bi-trash-fill"/></Button>
             </InputGroup>
             <div className="d-flex">

@@ -5,7 +5,7 @@ import { toggleTask as toggleTaskStatus, newTask, updateTaskTitle, endTask, addT
 import _ from 'lodash'
 import { TaskList } from './components/TaskList'
 import { TagList } from './components/TagList'
-import { TaskTags } from './components/TaskTags'
+import { TaskDetails } from './components/TaskDetails'
 
 const TODO_APP = "todo_app"
 const TASKS = 'tasks'
@@ -99,7 +99,7 @@ function reducer(state, action) {
 
 function App() {
   const [state, dispatch] = useReducer(reducer, JSON.parse(localStorage.getItem(TODO_APP)) || { tasks: [], tags: [] })
-  const [showTags, setShowTags] = useState(false)
+  const [showDetails, setShowDetails] = useState(false)
   const [currentTaskId, setCurrentTaskId] = useState(null)
 
   useEffect(() => {
@@ -108,11 +108,11 @@ function App() {
 
   return (
     <Container fluid>
-      <TaskTags
+      <TaskDetails
         allTags={state.tags}
         task={_.find(state.tasks, { id: currentTaskId })}
-        show={showTags}
-        closeShow={() => setShowTags(false)}
+        show={showDetails}
+        closeShow={() => setShowDetails(false)}
         addTaskTag={(id, tag) => dispatch({
           type: ACTIONS.ADD_TASK_TAG, payload: {
             id, tag
@@ -138,9 +138,9 @@ function App() {
         <TaskList
           tasks={state.tasks}
           allTags={state.tags}
-          showTags={(id) => {
+          showDetails={(id) => {
             setCurrentTaskId(id);
-            setShowTags(true)
+            setShowDetails(true)
           }}
           onToggleStatus={id => dispatch({ type: ACTIONS.TOGGLE_TASK_STATUS, payload: { id } })}
           removeTask={id => dispatch({ type: ACTIONS.REMOVE_TASK, payload: { id } })}

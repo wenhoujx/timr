@@ -1,4 +1,4 @@
-import _, { random, sum } from "lodash"
+import _, { random, sample, sum } from "lodash"
 
 export const TITLE = 'title'
 export const ID = 'id'
@@ -72,12 +72,7 @@ export function endTask(task) {
 }
 
 export function randomColor() {
-    var letters = '0123456789ABCDEF';
-    var color = '#';
-    for (var i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
+    return _.sample(COLORS)
 }
 
 
@@ -116,6 +111,7 @@ export function newTask(task) {
     return {
         id: randomId(),
         title: task,
+        description: '', 
         durations: [
             startDuration()
         ],
@@ -158,3 +154,17 @@ export function formatTime(elapsed) {
         return out
     }
 }
+
+
+// from github default colors 
+// https://gist.github.com/borekb/d61cdc45f0c92606a92b15388cf80185
+const COLORS = [
+    '#b60205', '#e99695',
+    '#d93f0b', '#f9d0c4',
+    '#fbca04', '#fef2c0',
+    '#0e8a16', '#c2e0c6',
+    '#006b75', '#bfdadc',
+    '#1d76db', '#c5def5',
+    '#0052cc', '#bfd4f2',
+    '#d4c5f9',
+];

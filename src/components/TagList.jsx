@@ -38,7 +38,11 @@ export function TagList({ tags, getTagTime, addTag, removeTag }) {
             {_.map(times, ([tag, time]) => (
                 <div
                     key={tag.tag}
-                    className='d-flex align-items-center p-0 bg-info rounded'>
+                    className='d-flex align-items-center p-0 rounded'
+                    style={{
+                        backgroundColor: tag.color
+                    }}
+                    >
                     <span className='px-1'>{tag.tag}: {formatTime(time)}</span>
                     <Button size='sm' onClick={() => removeTag(tag.tag)}>x</Button>
 
