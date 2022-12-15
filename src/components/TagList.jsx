@@ -1,5 +1,5 @@
-import _ from 'lodash'
-import { useState } from 'react'
+import _, { throttle } from 'lodash'
+import { useEffect, useState } from 'react'
 import { Button } from "react-bootstrap"
 import { formatTime } from '../utils/utils'
 
@@ -15,17 +15,19 @@ export function TagList({ tags, getTagTime, addTag, removeTag }) {
             return
         }
         addTag(value)
-        setTimes(prev => [...prev, [value, 0]])
         setValue("")
     }
-
+    useEffect(() => {
+        setTimes(computeTimes(tags, getTagTime))
+    }, [tags])
     const refreshTimes = () => {
         setTimes(computeTimes(tags, getTagTime))
     }
+
     return (
         <div className='d-flex justify-content-start flex-wrap'
         >
-            <Button size='sm' onClick={refreshTimes}>Refresh</Button>
+            <Button size='sm' onClick={refreshTimes}><i className='icon bi-arrow-clockwise'/></Button>
             <input
                 style={{ width: '7rem' }}
                 placeholder='+new tag'

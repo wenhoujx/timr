@@ -1,4 +1,4 @@
-import { useState, useReducer } from 'react'
+import { useState, useReducer, useEffect } from 'react'
 import { Container } from 'react-bootstrap'
 import { NewTask } from './components/NewTask'
 import { toggleTask as toggleTaskStatus, newTask, updateTaskTitle, endTask, addTaskTag, removeTaskTag, getTagTime } from './utils/utils'
@@ -98,9 +98,10 @@ function App() {
   const [state, dispatch] = useReducer(reducer, JSON.parse(localStorage.getItem(TODO_APP)) || { tasks: {}, tags: {} })
   const [showTags, setShowTags] = useState(false)
   const [currentTaskId, setCurrentTaskId] = useState(null)
-  // useEffect(() => {
-  //   localStorage.setItem(TASKS, JSON.stringify(state))
-  // }, [state])
+
+  useEffect(() => {
+    localStorage.setItem(TODO_APP, JSON.stringify(state))
+  }, [state])
 
   return (
     <Container fluid>
@@ -121,7 +122,7 @@ function App() {
           }
         })}
       />
-      <div className='mb-2'>
+      <div className='mt-1 mb-3 shadow'>
         <TagList
           tags={state.tags}
           addTag={tag => dispatch({ type: ACTIONS.ADD_TAG, payload: { tag } })}
