@@ -7,12 +7,14 @@ import { TaskList } from './components/TaskList'
 import { TagList } from './components/TagList'
 import { TaskDetails } from './components/TaskDetails'
 import { TopControls } from './components/TopControls'
+import { init } from './data/initialData'
 
 const TODO_APP = "todo_app"
 const TASKS = 'tasks'
 const tags = "tags"
 
 const ACTIONS = {
+  RESET: 'reset',
   ADD_TASK: 'add_task',
   REMOVE_TASK: 'remove_task',
   UPDATE_TASK_TITLE: 'update_task_title',
@@ -27,6 +29,8 @@ const ACTIONS = {
 
 function reducer(state, action) {
   switch (action.type) {
+    case (ACTIONS.RESET):
+      return init
     case (ACTIONS.ADD_TAG):
       return {
         ...state,
@@ -111,7 +115,7 @@ function reducer(state, action) {
 }
 
 function App() {
-  const [state, dispatch] = useReducer(reducer, JSON.parse(localStorage.getItem(TODO_APP)) || { tasks: [], tags: [] })
+  const [state, dispatch] = useReducer(reducer, JSON.parse(localStorage.getItem(TODO_APP)) || init)
   const [showDetails, setShowDetails] = useState(false)
   const [currentTaskId, setCurrentTaskId] = useState(null)
 
@@ -122,7 +126,10 @@ function App() {
   return (
     <Container fluid>
       <div className='mt-1'>
-        <TopControls />
+        <TopControls state={state}
+          reset={() => dispatch({
+            type: ACTIONS.RESET
+          })} />
       </div>
       <TaskDetails
         allTags={state.tags}

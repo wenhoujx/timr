@@ -1,4 +1,4 @@
-import { formatTime, elapsedTime, isStopped, lastUpdated } from "../utils/utils";
+import { formatTime, elapsedTime, isStopped, lastUpdated, now_in_seconds } from "../utils/utils";
 import { ListGroup, ListGroupItem } from "react-bootstrap";
 import { useState } from "react";
 import _ from 'lodash'
@@ -6,7 +6,8 @@ import { useEffect } from "react";
 
 export function TaskList({ tasks, allTags, showDetails, onToggleStatus }) {
     // make sure the last updated one is on top. 
-    const sortedTasks = _.sortBy(tasks, (task) => isStopped(task) ? lastUpdated(task) : 0)
+    const now = now_in_seconds()
+    const sortedTasks = _.sortBy(tasks, (task) => isStopped(task) ? now - lastUpdated(task) : -1)
     return (
         <ListGroup
         >

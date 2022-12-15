@@ -139,7 +139,7 @@ export function totalElapsedTime(tasks) {
     return _.sum(_.map(tasks, elapsedTime))
 }
 
-function now_in_seconds() {
+export function now_in_seconds() {
     return _.floor(_.now() / 1000)
 }
 

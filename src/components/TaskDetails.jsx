@@ -1,5 +1,27 @@
 import _ from "lodash";
 import { Button, Form, Offcanvas, } from "react-bootstrap";
+import { formatTime } from "../utils/utils";
+
+
+function formatDuration(duration) {
+    const { start, end, elapsed } = duration
+    const padTo2 = str => _.padStart(str, 2, '0')
+    let formatString = ""
+    const startD = new Date(start * 1000)
+    formatString = `${padTo2(startD.getHours())}:${padTo2(startD.getMinutes())}`
+    if (end) {
+        const endD = new Date(end * 1000)
+        formatString += ` - ${padTo2(endD.getHours())}:${padTo2(endD.getMinutes())}`
+    } else {
+        formatString += ' - running'
+    }
+    if (elapsed) {
+        formatString += ` total: ${formatTime(elapsed)}`
+    }
+    return formatString
+}
+
+
 
 export function TaskDetails({ allTags, task, show, closeShow, addTaskTag, removeTaskTag, removeTask, updateTaskTitle, updateTaskNotes }) {
     return (
@@ -18,8 +40,12 @@ export function TaskDetails({ allTags, task, show, closeShow, addTaskTag, remove
                             onChange={e => updateTaskNotes(task.id, e.target.value)}
                         />
                     </Form.Group>
-
                 </Form>
+                <div className="bg-light">
+                    {_.map(task.durations, dur => (
+                        <div key={dur.start}>{formatDuration(dur)}</div>
+                    ))}
+                </div>
                 <Tags
                     allTags={allTags}
                     selectedTags={task.tags}
