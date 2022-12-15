@@ -1,4 +1,4 @@
-import _, { sum } from "lodash"
+import _, { random, sum } from "lodash"
 
 export const TITLE = 'title'
 export const ID = 'id'
@@ -71,6 +71,16 @@ export function endTask(task) {
     }
 }
 
+export function randomColor() {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
+
+
 export function getTagTime(taskList, tag) {
     return _.sum(
         _.map(
@@ -92,8 +102,19 @@ export function addTaskTag(task, tag) {
     }
 }
 
+export function newTag(tag) {
+    return {
+        tag,
+        color: randomColor()
+    }
+}
+
+function randomId() {
+    return Math.floor(Math.random() * 10000)
+}
 export function newTask(task) {
     return {
+        id: randomId(),
         title: task,
         durations: [
             startDuration()

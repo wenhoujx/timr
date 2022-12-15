@@ -6,13 +6,12 @@ import { useEffect } from "react";
 
 export function TaskList({ tasks, showTags, onToggleStatus, removeTask, updateTaskTitle }) {
     // make sure the last updated one is on top. 
-    const sortedTasks = _.sortBy(_.toPairs(tasks), ([id, task]) => isStopped(task) ? lastUpdated(task) : 0)
+    const sortedTasks = _.sortBy(tasks, (task) => isStopped(task) ? lastUpdated(task) : 0)
     return (
         <div>
-            {_.map(sortedTasks, ([id, task]) => (
-                <div className="mb-1" key={id}>
+            {_.map(sortedTasks, (task) => (
+                <div className="mb-1" key={task.id}>
                     <SingleTask
-                        taskId={id}
                         task={task}
                         showTags={showTags}
                         onToggleStatus={onToggleStatus}
@@ -25,7 +24,7 @@ export function TaskList({ tasks, showTags, onToggleStatus, removeTask, updateTa
     )
 }
 
-function SingleTask({ taskId, task, showTags, onToggleStatus, removeTask, updateTaskTitle }) {
+function SingleTask({ task, showTags, onToggleStatus, removeTask, updateTaskTitle }) {
     const [editing, setEditing] = useState(false)
     const [elapsed, setElapsed] = useState(0)
 
@@ -45,18 +44,18 @@ function SingleTask({ taskId, task, showTags, onToggleStatus, removeTask, update
         <div>
             <InputGroup>
                 <Button className={`${isStopped(task) ? 'btn-success' : 'btn-warning'}`}
-                    onClick={() => onToggleStatus(taskId)}>
+                    onClick={() => onToggleStatus(task.id)}>
                     {formatTime(elapsed)}
                 </Button>
                 <Form.Control
                     value={task.title}
-                    onChange={e => updateTaskTitle(taskId, e.target.value)}
+                    onChange={e => updateTaskTitle(task.id, e.target.value)}
                     onClick={() => setEditing(true)}
                     readOnly={!editing}
                 />
 
-                <Button onClick={() => showTags(taskId)}>#</Button>
-                <Button variant="danger" onClick={() => removeTask(taskId)}>x</Button>
+                <Button onClick={() => showTags(task.id)}>#</Button>
+                <Button variant="danger" onClick={() => removeTask(task.id)}><i className="bi-trash-fill"/></Button>
             </InputGroup>
             <div className="d-flex">
                 {_.map(task.tags, tag => (

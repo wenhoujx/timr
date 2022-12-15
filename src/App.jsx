@@ -1,7 +1,7 @@
 import { useState, useReducer, useEffect } from 'react'
 import { Container } from 'react-bootstrap'
 import { NewTask } from './components/NewTask'
-import { toggleTask as toggleTaskStatus, newTask, updateTaskTitle, endTask, addTaskTag, removeTaskTag, getTagTime } from './utils/utils'
+import { toggleTask as toggleTaskStatus, newTask, updateTaskTitle, endTask, addTaskTag, removeTaskTag, getTagTime, newTag } from './utils/utils'
 import _ from 'lodash'
 import { TaskList } from './components/TaskList'
 import { TagList } from './components/TagList'
@@ -26,76 +26,79 @@ const ACTIONS = {
 function reducer(state, action) {
   switch (action.type) {
     case (ACTIONS.ADD_TAG):
-      const newTag = action.payload.tag
       return {
         ...state,
-        tags: _.includes(_.keys(state.tags), newTag) ? state.tags : { ...state.tags, [newTag]: {} }
+        tags: _.find(state.tags, { tag: action.payload.tag }) ? state.tags : [...state.tags, newTag(action.payload.tag)]
       }
     case (ACTIONS.REMOVE_TAG):
       return {
         ...state,
-        tasks: {
-          ..._.mapValues(state.tasks, task => removeTaskTag(task, action.payload.tag))
-        },
-        tags: _.omit(state.tags, [action.payload.tag])
+        tasks: _.map(state.tasks, t => removeTaskTag(t, action.payload.tag)),
+        tags: _.filter(state.tags, t => t.tag !== action.payload.tag)
       }
     case (ACTIONS.UPDATE_TAG):
       return {}
     case (ACTIONS.ADD_TASK_TAG):
-      const id1 = action.payload.id
       return {
         ...state,
-        tasks: {
-          ...state.tasks,
-          [id1]: addTaskTag(state.tasks[id1], action.payload.tag)
-        }
+        tasks: _.map(state.tasks, t => {
+          if (t.id === action.payload.id) {
+            return addTaskTag(t, action.payload.tag)
+          } else {
+            return t
+          }
+        })
       }
     case (ACTIONS.REMOVE_TASK_TAG):
       const id2 = action.payload.id
       return {
         ...state,
-        tasks: {
-          ...state.tasks,
-          [id2]: removeTaskTag(state.tasks[id2], action.payload.tag)
-        }
+        tasks: _.map(state.tasks, t => {
+          if (t.id === action.payload.id) {
+            return removeTaskTag(t, action.payload.tag)
+          } else {
+            return t
+          }
+        })
       }
     case (ACTIONS.ADD_TASK):
       return {
         ...state,
-        tasks: {
-          ..._.mapValues(state.tasks, endTask),
-          [_.uniqueId()]: newTask(action.payload.title),
-        }
+        tasks: [..._.map(state.tasks, endTask), newTask(action.payload.title)]
       }
     case (ACTIONS.REMOVE_TASK):
       return {
         ...state,
-        tasks: _.omit(state.tasks, [action.payload.id])
+        tasks: _.filter(state.tasks, t => t.id !== action.payload.id)
       }
     case (ACTIONS.TOGGLE_TASK_STATUS):
-      const toggleId = action.payload.id
       return {
         ...state,
-        tasks: {
-          ..._.mapValues(state.tasks, endTask),
-          [toggleId]: toggleTaskStatus(state.tasks[toggleId])
-        }
+        tasks: _.map(state.tasks, t => {
+          if (t.id === action.payload.id) {
+            return toggleTaskStatus(t)
+          } else {
+            return t
+          }
+        })
       }
     case (ACTIONS.UPDATE_TASK_TITLE):
-      const updateTitleId = action.payload.id
       return {
         ...state,
-        tasks: {
-          ...state.tasks,
-          [updateTitleId]: updateTaskTitle(state.tasks[updateTitleId], action.payload.title)
-        }
+        tasks: _.map(state.tasks, t => {
+          if (t.id === action.payload.id) {
+            return updateTaskTitle(t, action.payload.title)
+          } else {
+            return t
+          }
+        })
       }
     default: return state
   }
 }
 
 function App() {
-  const [state, dispatch] = useReducer(reducer, JSON.parse(localStorage.getItem(TODO_APP)) || { tasks: {}, tags: {} })
+  const [state, dispatch] = useReducer(reducer, JSON.parse(localStorage.getItem(TODO_APP)) || { tasks: [], tags: [] })
   const [showTags, setShowTags] = useState(false)
   const [currentTaskId, setCurrentTaskId] = useState(null)
 
@@ -107,8 +110,7 @@ function App() {
     <Container fluid>
       <TaskTags
         allTags={state.tags}
-        taskId={currentTaskId}
-        task={state.tasks[currentTaskId]}
+        task={_.find(state.tasks, { id: currentTaskId })}
         show={showTags}
         closeShow={() => setShowTags(false)}
         addTaskTag={(id, tag) => dispatch({
@@ -140,7 +142,6 @@ function App() {
             setCurrentTaskId(id);
             setShowTags(true)
           }}
-
           onToggleStatus={id => dispatch({ type: ACTIONS.TOGGLE_TASK_STATUS, payload: { id } })}
           removeTask={id => dispatch({ type: ACTIONS.REMOVE_TASK, payload: { id } })}
           updateTaskTitle={(id, title) => dispatch({
