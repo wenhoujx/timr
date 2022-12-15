@@ -6,6 +6,7 @@ import _ from 'lodash'
 import { TaskList } from './components/TaskList'
 import { TagList } from './components/TagList'
 import { TaskDetails } from './components/TaskDetails'
+import { TopControls } from './components/TopControls'
 
 const TODO_APP = "todo_app"
 const TASKS = 'tasks'
@@ -108,6 +109,7 @@ function App() {
 
   return (
     <Container fluid>
+      <TopControls />
       <TaskDetails
         allTags={state.tags}
         task={_.find(state.tasks, { id: currentTaskId })}
@@ -121,6 +123,12 @@ function App() {
         removeTaskTag={(id, tag) => dispatch({
           type: ACTIONS.REMOVE_TASK_TAG, payload: {
             id, tag
+          }
+        })}
+        removeTask={() => dispatch({
+          type: ACTIONS.REMOVE_TASK,
+          payload: {
+            id: currentTaskId
           }
         })}
       />

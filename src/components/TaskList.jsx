@@ -1,10 +1,10 @@
 import { formatTime, elapsedTime, isStopped, lastUpdated } from "../utils/utils";
 import { Button, InputGroup, Form, Badge } from "react-bootstrap";
 import { useState } from "react";
-import _, { remove } from 'lodash'
+import _ from 'lodash'
 import { useEffect } from "react";
 
-export function TaskList({ tasks, showDetails, onToggleStatus, removeTask, updateTaskTitle }) {
+export function TaskList({ tasks, showDetails, onToggleStatus,  updateTaskTitle }) {
     // make sure the last updated one is on top. 
     const sortedTasks = _.sortBy(tasks, (task) => isStopped(task) ? lastUpdated(task) : 0)
     return (
@@ -15,7 +15,6 @@ export function TaskList({ tasks, showDetails, onToggleStatus, removeTask, updat
                         task={task}
                         showDetails={showDetails}
                         onToggleStatus={onToggleStatus}
-                        removeTask={removeTask}
                         updateTaskTitle={updateTaskTitle}
                     />
                 </div>
@@ -24,7 +23,7 @@ export function TaskList({ tasks, showDetails, onToggleStatus, removeTask, updat
     )
 }
 
-function SingleTask({ task, showDetails, onToggleStatus, removeTask, updateTaskTitle }) {
+function SingleTask({ task, showDetails, onToggleStatus,  updateTaskTitle }) {
     const [editing, setEditing] = useState(false)
     const [elapsed, setElapsed] = useState(0)
 
@@ -47,15 +46,14 @@ function SingleTask({ task, showDetails, onToggleStatus, removeTask, updateTaskT
                     onClick={() => onToggleStatus(task.id)}>
                     {formatTime(elapsed)}
                 </Button>
+                
                 <Form.Control
                     value={task.title}
                     onChange={e => updateTaskTitle(task.id, e.target.value)}
                     onClick={() => setEditing(true)}
                     readOnly={!editing}
                 />
-
-                <Button onClick={() => showDetails(task.id)}>#</Button>
-                <Button variant="danger" onClick={() => removeTask(task.id)}><i className="bi-trash-fill"/></Button>
+                <Button className="bi-gear" onClick={() => showDetails(task.id)} />
             </InputGroup>
             <div className="d-flex">
                 {_.map(task.tags, tag => (
