@@ -1,30 +1,30 @@
 import { formatTime, elapsedTime, isStopped, lastUpdated } from "../utils/utils";
-import { Button, InputGroup, Form, Badge } from "react-bootstrap";
+import { ListGroup, ListGroupItem } from "react-bootstrap";
 import { useState } from "react";
 import _ from 'lodash'
 import { useEffect } from "react";
 
-export function TaskList({ tasks, showDetails, onToggleStatus,  updateTaskTitle }) {
+export function TaskList({ tasks, allTags, showDetails, onToggleStatus }) {
     // make sure the last updated one is on top. 
     const sortedTasks = _.sortBy(tasks, (task) => isStopped(task) ? lastUpdated(task) : 0)
     return (
-        <div>
+        <ListGroup
+        >
             {_.map(sortedTasks, (task) => (
-                <div className="mb-1" key={task.id}>
+                <div key={task.id}>
                     <SingleTask
                         task={task}
+                        allTags={allTags}
                         showDetails={showDetails}
                         onToggleStatus={onToggleStatus}
-                        updateTaskTitle={updateTaskTitle}
                     />
                 </div>
             ))}
-        </div>
+        </ListGroup>
     )
 }
 
-function SingleTask({ task, showDetails, onToggleStatus,  updateTaskTitle }) {
-    const [editing, setEditing] = useState(false)
+function SingleTask({ task, allTags, showDetails, onToggleStatus }) {
     const [elapsed, setElapsed] = useState(0)
 
     useEffect(() => {
@@ -40,30 +40,38 @@ function SingleTask({ task, showDetails, onToggleStatus,  updateTaskTitle }) {
     }, [task])
 
     return (
-        <div>
-            <InputGroup>
-                <Button className={`${isStopped(task) ? 'btn-success' : 'btn-warning bi-stopwatch-fill'}`}
-                    onClick={() => onToggleStatus(task.id)}>
+        <ListGroupItem
+            action
+            onClick={() => showDetails(task.id)}
+            className="p-0 border-0"
+        >
+            <div
+                className="d-flex align-items-center"
+            >
+                <div
+                    className={`${isStopped(task) ? 'bg-success' : 'bg-warning bi-stopwatch-fill'} px-1`}
+                    onClick={(e) => { e.preventDefault(); onToggleStatus(task.id) }}>
                     {formatTime(elapsed)}
-                </Button>
-                
-                <Form.Control
-                    value={task.title}
-                    onChange={e => updateTaskTitle(task.id, e.target.value)}
-                    onClick={() => setEditing(true)}
-                    readOnly={!editing}
-                />
-                <Button className="bi-gear" onClick={() => showDetails(task.id)} />
-            </InputGroup>
-            <div className="d-flex">
-                {_.map(task.tags, tag => (
-                    <Badge key={tag}>
-                        {tag}
-                    </Badge>
+                </div>
+                <div
+
+                    className="px-1 me-auto"
+                >
+                    {task.title}
+                </div>
+            </div>
+            <div className="border-bottom">
+                {_.map(_.map(task.tags, t => _.find(allTags, { tag: t })), tag => (
+                    <div className="d-inline rounded px-1"
+                        key={tag.tag}
+                        style={{
+                            backgroundColor: tag.color
+                        }}>
+                        {tag.tag}
+                    </div>
                 ))}
 
             </div>
-
-        </div>
+        </ListGroupItem >
     )
 }

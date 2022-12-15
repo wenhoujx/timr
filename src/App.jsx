@@ -1,7 +1,7 @@
 import { useState, useReducer, useEffect } from 'react'
 import { Container } from 'react-bootstrap'
 import { NewTask } from './components/NewTask'
-import { toggleTask as toggleTaskStatus, newTask, updateTaskTitle, endTask, addTaskTag, removeTaskTag, getTagTime, newTag } from './utils/utils'
+import { toggleTaskStatus, newTask, updateTaskTitle, endTask, addTaskTag, removeTaskTag, getTagTime, newTag, updateTaskNotes } from './utils/utils'
 import _ from 'lodash'
 import { TaskList } from './components/TaskList'
 import { TagList } from './components/TagList'
@@ -16,6 +16,7 @@ const ACTIONS = {
   ADD_TASK: 'add_task',
   REMOVE_TASK: 'remove_task',
   UPDATE_TASK_TITLE: 'update_task_title',
+  UPDATE_TASK_NOTES: 'update_task_notes',
   TOGGLE_TASK_STATUS: 'toggle_task_status',
   ADD_TAG: 'add_tag',
   REMOVE_TAG: 'remove_tag',
@@ -79,7 +80,7 @@ function reducer(state, action) {
           if (t.id === action.payload.id) {
             return toggleTaskStatus(t)
           } else {
-            return t
+            return endTask(t)
           }
         })
       }
@@ -89,6 +90,17 @@ function reducer(state, action) {
         tasks: _.map(state.tasks, t => {
           if (t.id === action.payload.id) {
             return updateTaskTitle(t, action.payload.title)
+          } else {
+            return t
+          }
+        })
+      }
+    case (ACTIONS.UPDATE_TASK_NOTES):
+      return {
+        ...state,
+        tasks: _.map(state.tasks, t => {
+          if (t.id === action.payload.id) {
+            return updateTaskNotes(t, action.payload.notes)
           } else {
             return t
           }
@@ -109,7 +121,9 @@ function App() {
 
   return (
     <Container fluid>
-      <TopControls />
+      <div className='mt-1'>
+        <TopControls />
+      </div>
       <TaskDetails
         allTags={state.tags}
         task={_.find(state.tasks, { id: currentTaskId })}
@@ -131,6 +145,18 @@ function App() {
             id: currentTaskId
           }
         })}
+        updateTaskTitle={(id, title) => dispatch({
+          type: ACTIONS.UPDATE_TASK_TITLE,
+          payload: {
+            id, title
+          }
+        })}
+        updateTaskNotes={(id, notes) => dispatch({
+          type: ACTIONS.UPDATE_TASK_NOTES,
+          payload: {
+            id, notes
+          }
+        })}
       />
       <div className='mt-1 mb-3 shadow'>
         <TagList
@@ -140,8 +166,9 @@ function App() {
           getTagTime={tag => getTagTime(state.tasks, tag)}
         />
       </div>
-      <NewTask addTask={title => dispatch({ type: ACTIONS.ADD_TASK, payload: { title } })} />
-
+      <div className='mb-2'>
+        <NewTask addTask={title => dispatch({ type: ACTIONS.ADD_TASK, payload: { title } })} />
+      </div>
       <div>
         <TaskList
           tasks={state.tasks}

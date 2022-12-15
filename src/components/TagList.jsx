@@ -27,7 +27,9 @@ export function TagList({ tags, getTagTime, addTag, removeTag }) {
     return (
         <div className='d-flex justify-content-start flex-wrap'
         >
-            <Button size='sm' onClick={refreshTimes}><i className='icon bi-arrow-clockwise' /></Button>
+            <Button
+                className='bi-arrow-clockwise'
+                size='sm' onClick={refreshTimes} />
             <input
                 style={{ width: '7rem' }}
                 placeholder='+new tag'
@@ -42,10 +44,9 @@ export function TagList({ tags, getTagTime, addTag, removeTag }) {
                     style={{
                         backgroundColor: tag.color
                     }}
-                    >
+                >
                     <span className='px-1'>{tag.tag}: {formatTime(time)}</span>
                     <Button size='sm' onClick={() => removeTag(tag.tag)}>x</Button>
-
                 </div>
 
             ))}

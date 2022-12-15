@@ -26,15 +26,21 @@ export function isStopped(task) {
     return _.every(task.durations, dur => !_.isNull(dur.end))
 }
 
-export function updateTaskTitle(task, newTitle) {
+export function updateTaskNotes(task, notes) {
     return {
         ...task,
-        title: newTitle,
+        notes
+    }
+}
+export function updateTaskTitle(task, title) {
+    return {
+        ...task,
+        title
     }
 }
 
 
-export function toggleTask(task) {
+export function toggleTaskStatus(task) {
     if (isStopped(task)) {
         return {
             ...task,
@@ -111,7 +117,7 @@ export function newTask(task) {
     return {
         id: randomId(),
         title: task,
-        description: '', 
+        notes: "",
         durations: [
             startDuration()
         ],
