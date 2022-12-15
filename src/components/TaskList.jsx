@@ -1,10 +1,10 @@
 import { formatTime, elapsedTime, isStopped, lastUpdated } from "../utils/utils";
 import { Button, InputGroup, Form, Badge } from "react-bootstrap";
 import { useState } from "react";
-import _ from 'lodash'
+import _, { remove } from 'lodash'
 import { useEffect } from "react";
 
-export function TaskList({ tasks, allTags, addTaskTag, onToggleStatus, removeTask, updateTaskTitle }) {
+export function TaskList({ tasks, showTags, onToggleStatus, removeTask, updateTaskTitle }) {
     // make sure the last updated one is on top. 
     const sortedTasks = _.sortBy(_.toPairs(tasks), ([id, task]) => isStopped(task) ? lastUpdated(task) : 0)
     return (
@@ -14,8 +14,7 @@ export function TaskList({ tasks, allTags, addTaskTag, onToggleStatus, removeTas
                     <SingleTask
                         taskId={id}
                         task={task}
-                        addTaskTag={addTaskTag}
-                        allTags={allTags}
+                        showTags={showTags}
                         onToggleStatus={onToggleStatus}
                         removeTask={removeTask}
                         updateTaskTitle={updateTaskTitle}
@@ -26,10 +25,9 @@ export function TaskList({ tasks, allTags, addTaskTag, onToggleStatus, removeTas
     )
 }
 
-function SingleTask({ taskId, task, allTags, addTaskTag, onToggleStatus, removeTask, updateTaskTitle }) {
+function SingleTask({ taskId, task, showTags, onToggleStatus, removeTask, updateTaskTitle }) {
     const [editing, setEditing] = useState(false)
     const [elapsed, setElapsed] = useState(0)
-    const [addingTag, setAddingTag] = useState(false)
 
     useEffect(() => {
         if (isStopped(task)) {
@@ -57,35 +55,18 @@ function SingleTask({ taskId, task, allTags, addTaskTag, onToggleStatus, removeT
                     readOnly={!editing}
                 />
 
-                <Button onClick={() => setAddingTag(true)}>#</Button>
-                <Button variant="danger">x</Button>
+                <Button onClick={() => showTags(taskId)}>#</Button>
+                <Button variant="danger" onClick={() => removeTask(taskId)}>x</Button>
             </InputGroup>
             <div className="d-flex">
                 {_.map(task.tags, tag => (
-                    <Badge>
+                    <Badge key={tag}>
                         {tag}
                     </Badge>
                 ))}
-                {
-                    addingTag && <AddTaskTag
-                        allTags={allTags}
-                        addTaskTag={(tag) => addTaskTag(taskId, tag)}
-                    />
 
-                }
             </div>
 
         </div>
     )
-}
-
-function AddTaskTag({ allTags, addTaskTag }) {
-    return (<Form.Select
-        size="sm"
-        onChange={e => { addTaskTag(taskId, e.target.value); setAddingTag(false) }}
-    >
-        {_.map(_.keys(allTags), tag => (
-            <option key={tag} value={tag}>{tag}</option>
-        ))}
-    </Form.Select>)
 }

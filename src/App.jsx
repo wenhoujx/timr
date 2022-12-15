@@ -1,10 +1,11 @@
-import { useState, useEffect, useReducer } from 'react'
-import { Col, Container, Row } from 'react-bootstrap'
+import { useState, useReducer } from 'react'
+import { Container } from 'react-bootstrap'
 import { NewTask } from './components/NewTask'
-import { toggleTask as toggleTaskStatus, newTask, updateTaskTitle, endTask, addTaskTag } from './utils/utils'
+import { toggleTask as toggleTaskStatus, newTask, updateTaskTitle, endTask, addTaskTag, removeTaskTag, getTagTime } from './utils/utils'
 import _ from 'lodash'
 import { TaskList } from './components/TaskList'
 import { TagList } from './components/TagList'
+import { TaskTags } from './components/TaskTags'
 
 const TODO_APP = "todo_app"
 const TASKS = 'tasks'
@@ -34,23 +35,30 @@ function reducer(state, action) {
       return {
         ...state,
         tasks: {
-          ..._.mapValues(state.tasks, remove_tag(action.payload.tag))
-        }, 
+          ..._.mapValues(state.tasks, task => removeTaskTag(task, action.payload.tag))
+        },
         tags: _.omit(state.tags, [action.payload.tag])
       }
     case (ACTIONS.UPDATE_TAG):
       return {}
     case (ACTIONS.ADD_TASK_TAG):
-      const taskId = action.payload.id
+      const id1 = action.payload.id
       return {
         ...state,
         tasks: {
           ...state.tasks,
-          [taskId]: addTaskTag(state.tasks[taskId], action.payload.tag)
+          [id1]: addTaskTag(state.tasks[id1], action.payload.tag)
         }
       }
     case (ACTIONS.REMOVE_TASK_TAG):
-      return {}
+      const id2 = action.payload.id
+      return {
+        ...state,
+        tasks: {
+          ...state.tasks,
+          [id2]: removeTaskTag(state.tasks[id2], action.payload.tag)
+        }
+      }
     case (ACTIONS.ADD_TASK):
       return {
         ...state,
@@ -88,43 +96,57 @@ function reducer(state, action) {
 
 function App() {
   const [state, dispatch] = useReducer(reducer, JSON.parse(localStorage.getItem(TODO_APP)) || { tasks: {}, tags: {} })
-
+  const [showTags, setShowTags] = useState(false)
+  const [currentTaskId, setCurrentTaskId] = useState(null)
   // useEffect(() => {
   //   localStorage.setItem(TASKS, JSON.stringify(state))
   // }, [state])
 
   return (
     <Container fluid>
-      <Row className='mt-1'>
-        <Col md={10}>
-          <div>
-            <NewTask addTask={title => dispatch({ type: ACTIONS.ADD_TASK, payload: { title } })} />
-          </div>
-          <div>
-            <TaskList
-              tasks={state.tasks}
-              allTags={state.tags}
-              addTaskTag={(id, tag) => dispatch({
-                type: ACTIONS.ADD_TASK_TAG, payload: {
-                  id, tag
-                }
-              })}
-              onToggleStatus={id => dispatch({ type: ACTIONS.TOGGLE_TASK_STATUS, payload: { id } })}
-              removeTask={id => dispatch({ type: ACTIONS.REMOVE_TASK, payload: { id } })}
-              updateTaskTitle={(id, title) => dispatch({
-                type: ACTIONS.UPDATE_TASK_TITLE, payload: { id, title }
-              })}
-            />
-          </div>
-        </Col>
-        <Col md={2}>
-          <TagList
-            tags={state.tags}
-            addTag={tag => dispatch({ type: ACTIONS.ADD_TAG, payload: { tag } })}
-            removeTag={tag => dispatch({ type: ACTIONS.REMOVE_TAG, payload: { tag } })}
-          />
-        </Col>
-      </Row>
+      <TaskTags
+        allTags={state.tags}
+        taskId={currentTaskId}
+        task={state.tasks[currentTaskId]}
+        show={showTags}
+        closeShow={() => setShowTags(false)}
+        addTaskTag={(id, tag) => dispatch({
+          type: ACTIONS.ADD_TASK_TAG, payload: {
+            id, tag
+          }
+        })}
+        removeTaskTag={(id, tag) => dispatch({
+          type: ACTIONS.REMOVE_TASK_TAG, payload: {
+            id, tag
+          }
+        })}
+      />
+      <div className='mb-2'>
+        <TagList
+          tags={state.tags}
+          addTag={tag => dispatch({ type: ACTIONS.ADD_TAG, payload: { tag } })}
+          removeTag={tag => dispatch({ type: ACTIONS.REMOVE_TAG, payload: { tag } })}
+          getTagTime={tag => getTagTime(state.tasks, tag)}
+        />
+      </div>
+      <NewTask addTask={title => dispatch({ type: ACTIONS.ADD_TASK, payload: { title } })} />
+
+      <div>
+        <TaskList
+          tasks={state.tasks}
+          allTags={state.tags}
+          showTags={(id) => {
+            setCurrentTaskId(id);
+            setShowTags(true)
+          }}
+
+          onToggleStatus={id => dispatch({ type: ACTIONS.TOGGLE_TASK_STATUS, payload: { id } })}
+          removeTask={id => dispatch({ type: ACTIONS.REMOVE_TASK, payload: { id } })}
+          updateTaskTitle={(id, title) => dispatch({
+            type: ACTIONS.UPDATE_TASK_TITLE, payload: { id, title }
+          })}
+        />
+      </div>
     </Container>
   )
 }

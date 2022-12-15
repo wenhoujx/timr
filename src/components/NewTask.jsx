@@ -11,7 +11,7 @@ export function NewTask({ addTask }) {
         addTask(value)
         setValue("")
     }
-    return (<InputGroup className="mb-3">
+    return (<InputGroup>
         <Button 
         className="btn-success"
         onClick={handleClick}>

@@ -1,4 +1,4 @@
-import _ from "lodash"
+import _, { sum } from "lodash"
 
 export const TITLE = 'title'
 export const ID = 'id'
@@ -68,6 +68,20 @@ export function endTask(task) {
                 }
             }
         })
+    }
+}
+
+export function getTagTime(taskList, tag) {
+    return _.sum(
+        _.map(
+            _.filter(taskList, task => _.includes(task.tags, tag)),
+            task => elapsedTime(task)))
+}
+
+export function removeTaskTag(task, tag) {
+    return {
+        ...task,
+        tags: _.without(task.tags, tag)
     }
 }
 
