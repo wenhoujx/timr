@@ -112,7 +112,6 @@ function reducer(state, action) {
         })
       }
     case (ACTIONS.UPDATE_TASK_INTERVALS):
-      console.log(JSON.stringify(action.payload))
       return {
         ...state,
         tasks: _.map(state.tasks, t => {

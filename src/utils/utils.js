@@ -2,13 +2,12 @@ import _, { random, sample, sum } from "lodash"
 
 export const TITLE = 'title'
 export const ID = 'id'
-export const DURATIONS = 'durations'
 export const ELAPSED = 'elapsed'
 export const START = 'start'
 export const END = 'end'
 
 
-function startDuration() {
+function startInterval() {
     return {
         // hack so that new task are sorted at the top :(
         start: now_in_seconds(),
@@ -18,18 +17,21 @@ function startDuration() {
 }
 
 export function lastUpdated(task) {
-    const lastDuration = _.last(task.durations)
-    return lastDuration.end ? lastDuration.end : now_in_seconds()
+    if (_.isEmpty(task.intervals)) {
+        return now_in_seconds()
+    }
+    const lastInterval = _.last(task.intervals)
+    return lastInterval.end ? lastInterval.end : now_in_seconds()
 }
 
 export function isStopped(task) {
-    return _.every(task.durations, dur => !_.isNull(dur.end))
+    return _.every(task.intervals, dur => !_.isNull(dur.end))
 }
 
 export function updateTaskIntervals(task, intervals) {
     return {
         ...task,
-        durations: intervals
+        intervals: intervals
     }
 }
 
@@ -51,7 +53,7 @@ export function toggleTaskStatus(task) {
     if (isStopped(task)) {
         return {
             ...task,
-            durations: [...task.durations, startDuration()],
+            intervals: [...task.intervals, startInterval()],
         }
     } else {
         return endTask(task)
@@ -69,7 +71,7 @@ export function endTask(task) {
     const now = now_in_seconds()
     return {
         ...task,
-        durations: _.map(task.durations, dur => {
+        intervals: _.map(task.intervals, dur => {
             if (dur.end) {
                 return dur
             } else {
@@ -125,15 +127,15 @@ export function newTask(task) {
         id: randomId(),
         title: task,
         notes: "",
-        durations: [
-            startDuration()
+        intervals: [
+            startInterval()
         ],
         tags: []
     }
 }
 
 export function elapsedTime(task) {
-    return _.sum(_.map(task.durations, dur => {
+    return _.sum(_.map(task.intervals, dur => {
         if (dur.elapsed) {
             return dur.elapsed
         } else {

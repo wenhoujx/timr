@@ -10,8 +10,8 @@ function formatTimeInSeconds(seconds) {
     return `${padTo2(endD.getHours())}:${padTo2(endD.getMinutes())}`
 }
 
-function formatDuration(duration) {
-    const { start, end, elapsed } = duration
+function formatInterval(interval) {
+    const { start, end, elapsed } = interval
     const padTo2 = str => _.padStart(str, 2, '0')
     let formatString = ""
     const startD = new Date(start * 1000)
@@ -76,13 +76,18 @@ function Intervals({ task, updateTaskIntervals }) {
 
     return (
         <div>
-            {_.map(task.durations, (dur, i) => (
-                <Duration
+            {_.map(task.intervals, (dur, i) => (
+                <Interval
                     key={i}
-                    duration={dur}
+                    interval={dur}
+                    deleteInterval = {
+                        () => updateTaskIntervals(
+                            task.id, _.filter(task.intervals, (interval, j) => j !== i )
+                        )
+                    }
                     updateInterval={
                         (newInterval) => updateTaskIntervals(
-                            task.id, _.map(task.durations, (dd, j) => {
+                            task.id, _.map(task.intervals, (dd, j) => {
                                 if (i === j) {
                                     return newInterval
                                 } else {
@@ -104,8 +109,8 @@ function getEpochSeconds(base, hh, mm) {
     return _.floor(d.getTime() / 1000)
 
 }
-function Duration({ duration, updateInterval }) {
-    const { start, end, elapsed } = duration
+function Interval({ interval, updateInterval, deleteInterval }) {
+    const { start, end, elapsed } = interval
     const [editing, setEditing] = useState(false)
     const [startValue, setStartValue] = useState(formatTimeInSeconds(start))
     const [endValue, setEndValue] = useState(end ? formatTimeInSeconds(end) : null)
@@ -123,12 +128,17 @@ function Duration({ duration, updateInterval }) {
     return <div>
         {
             !editing ? (
-                <div onDoubleClick={() => setEditing(true)}>
-                    {formatDuration(duration)}
-                </div>
+                <>
+                    <i className="bi-x-circle-fill p-0 me-1" 
+                    onClick={() => deleteInterval()} />
+                    <div className="d-inline" onDoubleClick={() => setEditing(true)}>
+                        {formatInterval(interval)}
+                    </div>
+                </>
 
             ) : (
                 <InputGroup onKeyDown={e => e.key === 'Enter' && handleEditing()}>
+
                     <Form.Control
                         size="sm"
                         value={startValue} onChange={e => setStartValue(e.target.value)} />

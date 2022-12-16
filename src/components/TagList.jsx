@@ -14,7 +14,7 @@ export function TagList({ tags, getTagTime, addTag, removeTag }) {
         if (_.isEmpty(value)) {
             return
         }
-        addTag(value)
+        addTag(_.trim(value))
         setValue("")
     }
     useEffect(() => {
