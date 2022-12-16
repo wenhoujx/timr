@@ -26,6 +26,13 @@ export function isStopped(task) {
     return _.every(task.durations, dur => !_.isNull(dur.end))
 }
 
+export function updateTaskIntervals(task, intervals) {
+    return {
+        ...task,
+        durations: intervals
+    }
+}
+
 export function updateTaskNotes(task, notes) {
     return {
         ...task,

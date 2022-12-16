@@ -60,8 +60,6 @@ function SingleTask({ task, allTags, showDetails, onToggleStatus }) {
                 >
                     {task.title}
                 </div>
-            </div>
-            <div className="border-bottom">
                 {_.map(_.map(task.tags, t => _.find(allTags, { tag: t })), tag => (
                     <div className="d-inline rounded px-1"
                         key={tag.tag}

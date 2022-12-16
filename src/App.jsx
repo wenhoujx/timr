@@ -1,7 +1,7 @@
 import { useState, useReducer, useEffect } from 'react'
 import { Container } from 'react-bootstrap'
 import { NewTask } from './components/NewTask'
-import { toggleTaskStatus, newTask, updateTaskTitle, endTask, addTaskTag, removeTaskTag, getTagTime, newTag, updateTaskNotes } from './utils/utils'
+import { toggleTaskStatus, newTask, updateTaskTitle, endTask, addTaskTag, removeTaskTag, getTagTime, newTag, updateTaskNotes, updateTaskIntervals } from './utils/utils'
 import _ from 'lodash'
 import { TaskList } from './components/TaskList'
 import { TagList } from './components/TagList'
@@ -19,6 +19,7 @@ const ACTIONS = {
   REMOVE_TASK: 'remove_task',
   UPDATE_TASK_TITLE: 'update_task_title',
   UPDATE_TASK_NOTES: 'update_task_notes',
+  UPDATE_TASK_INTERVALS: 'udpate_task_intervals', 
   TOGGLE_TASK_STATUS: 'toggle_task_status',
   ADD_TAG: 'add_tag',
   REMOVE_TAG: 'remove_tag',
@@ -110,6 +111,18 @@ function reducer(state, action) {
           }
         })
       }
+    case (ACTIONS.UPDATE_TASK_INTERVALS):
+      console.log(JSON.stringify(action.payload))
+      return {
+        ...state,
+        tasks: _.map(state.tasks, t => {
+          if (t.id === action.payload.id) {
+            return updateTaskIntervals(t, action.payload.intervals)
+          } else {
+            return t
+          }
+        })
+      }
     default: return state
   }
 }
@@ -162,6 +175,12 @@ function App() {
           type: ACTIONS.UPDATE_TASK_NOTES,
           payload: {
             id, notes
+          }
+        })}
+        updateTaskIntervals = {(id, intervals) => dispatch({
+          type: ACTIONS.UPDATE_TASK_INTERVALS, 
+          payload: {
+            id, intervals 
           }
         })}
       />

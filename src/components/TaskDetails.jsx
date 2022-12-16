@@ -1,7 +1,14 @@
 import _ from "lodash";
-import { Button, Form, Offcanvas, } from "react-bootstrap";
+import { useState } from "react";
+import { Button, Form, InputGroup, Offcanvas, } from "react-bootstrap";
 import { formatTime } from "../utils/utils";
 
+
+function formatTimeInSeconds(seconds) {
+    const padTo2 = str => _.padStart(str, 2, '0')
+    const endD = new Date(seconds * 1000)
+    return `${padTo2(endD.getHours())}:${padTo2(endD.getMinutes())}`
+}
 
 function formatDuration(duration) {
     const { start, end, elapsed } = duration
@@ -23,7 +30,7 @@ function formatDuration(duration) {
 
 
 
-export function TaskDetails({ allTags, task, show, closeShow, addTaskTag, removeTaskTag, removeTask, updateTaskTitle, updateTaskNotes }) {
+export function TaskDetails({ allTags, task, show, closeShow, addTaskTag, removeTaskTag, removeTask, updateTaskTitle, updateTaskNotes, updateTaskIntervals }) {
     return (
         task &&
         <Offcanvas show={show} onHide={() => closeShow()} placement='end'>
@@ -41,10 +48,11 @@ export function TaskDetails({ allTags, task, show, closeShow, addTaskTag, remove
                         />
                     </Form.Group>
                 </Form>
-                <div className="bg-light">
-                    {_.map(task.durations, dur => (
-                        <div key={dur.start}>{formatDuration(dur)}</div>
-                    ))}
+                <div className="intervals">
+                    <Intervals
+                        task={task}
+                        updateTaskIntervals={updateTaskIntervals}
+                    />
                 </div>
                 <Tags
                     allTags={allTags}
@@ -62,6 +70,78 @@ export function TaskDetails({ allTags, task, show, closeShow, addTaskTag, remove
 
         </Offcanvas>
     )
+}
+
+function Intervals({ task, updateTaskIntervals }) {
+
+    return (
+        <div>
+            {_.map(task.durations, (dur, i) => (
+                <Duration
+                    key={i}
+                    duration={dur}
+                    updateInterval={
+                        (newInterval) => updateTaskIntervals(
+                            task.id, _.map(task.durations, (dd, j) => {
+                                if (i === j) {
+                                    return newInterval
+                                } else {
+                                    return dd
+                                }
+                            })
+                        )
+                    }
+                />
+            ))}
+        </div>
+    )
+}
+
+function getEpochSeconds(base, hh, mm) {
+    const d = new Date(base * 1000)
+    d.setHours(hh)
+    d.setMinutes(mm)
+    return _.floor(d.getTime() / 1000)
+
+}
+function Duration({ duration, updateInterval }) {
+    const { start, end, elapsed } = duration
+    const [editing, setEditing] = useState(false)
+    const [startValue, setStartValue] = useState(formatTimeInSeconds(start))
+    const [endValue, setEndValue] = useState(end ? formatTimeInSeconds(end) : null)
+
+    const handleEditing = () => {
+        setEditing(false)
+        const startSeconds = getEpochSeconds(start, ...startValue.split(':'))
+        const endSeconds = end ? getEpochSeconds(end, ...endValue.split(':')) : null
+        updateInterval({
+            start: startSeconds,
+            end: endSeconds,
+            elapsed: endSeconds ? endSeconds - startSeconds : null
+        })
+    }
+    return <div>
+        {
+            !editing ? (
+                <div onDoubleClick={() => setEditing(true)}>
+                    {formatDuration(duration)}
+                </div>
+
+            ) : (
+                <InputGroup onKeyDown={e => e.key === 'Enter' && handleEditing()}>
+                    <Form.Control
+                        size="sm"
+                        value={startValue} onChange={e => setStartValue(e.target.value)} />
+                    {end && (
+                        <Form.Control
+                            size="sm"
+                            placeholder={formatTimeInSeconds(end)}
+                            value={endValue} onChange={e => setEndValue(e.target.value)} />
+                    )}
+                </InputGroup>
+            )
+        }
+    </div>
 }
 
 function Tags({ allTags, selectedTags, addTaskTag, removeTaskTag }) {
