@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { useState } from "react";
-import { Button, Form, InputGroup, Offcanvas, } from "react-bootstrap";
+import { Badge, Button, Form, FormControl, InputGroup, Offcanvas, } from "react-bootstrap";
 import { formatTime } from "../utils/utils";
 
 
@@ -35,20 +35,11 @@ export function TaskDetails({ allTags, task, show, closeShow, addTaskTag, remove
         task &&
         <Offcanvas show={show} onHide={() => closeShow()} placement='end'>
             <Offcanvas.Body>
-                <Form>
-                    <Form.Group className="mb-3">
-                        <Form.Label>Title</Form.Label>
-                        <Form.Control type="input" value={task.title} onChange={e => updateTaskTitle(task.id, e.target.value)} />
-                    </Form.Group>
-
-                    <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
-                        <Form.Label>Notes</Form.Label>
-                        <Form.Control as="textarea" rows={3} value={task.notes}
-                            onChange={e => updateTaskNotes(task.id, e.target.value)}
-                        />
-                    </Form.Group>
-                </Form>
-                <div className="intervals">
+                <strong>Title:</strong>
+                <InputGroup size="sm">
+                    <Form.Control type="input" value={task.title} onChange={e => updateTaskTitle(task.id, e.target.value)} />
+                </InputGroup>
+                <div className="intervals bg-light">
                     <Intervals
                         task={task}
                         updateTaskIntervals={updateTaskIntervals}
@@ -60,8 +51,19 @@ export function TaskDetails({ allTags, task, show, closeShow, addTaskTag, remove
                     addTaskTag={tag => addTaskTag(task.id, tag)}
                     removeTaskTag={tag => removeTaskTag(task.id, tag)}
                 />
-                <div className="text-end">
-                    <Button className="btn-danger bi-trash-fill"
+                <div className="notes">
+                    <strong>Notes:</strong>
+                    <InputGroup
+                        size="sm">
+                        <Form.Control as="textarea" rows={5} value={task.notes}
+                            onChange={e => updateTaskNotes(task.id, e.target.value)}
+                        />
+                    </InputGroup>
+                </div>
+                <div className="d-grid mt-2">
+                    <Button
+                        size="sm"
+                        className="btn-danger bi-trash-fill"
                         onClick={() => removeTask()}
                     />
                 </div>
@@ -73,9 +75,9 @@ export function TaskDetails({ allTags, task, show, closeShow, addTaskTag, remove
 }
 
 function Intervals({ task, updateTaskIntervals }) {
-
     return (
         <div>
+            <strong>Intervals:</strong>
             {_.map(task.intervals, (dur, i) => (
                 <Interval
                     key={i}
@@ -130,7 +132,7 @@ function Interval({ interval, updateInterval, deleteInterval }) {
             !editing ? (
                 <>
                     <i className="bi-x-circle-fill p-0 me-1"
-                    style={{color: 'red'}}
+                        style={{ color: 'red' }}
                         onClick={() => deleteInterval()} />
                     <div className="d-inline" onDoubleClick={() => setEditing(true)}>
                         {formatInterval(interval)}
@@ -162,19 +164,20 @@ function Interval({ interval, updateInterval, deleteInterval }) {
 function Tags({ allTags, selectedTags, addTaskTag, removeTaskTag }) {
     return (
         <>
-            <div>Tags:</div>
-            {_.map(allTags, tag => (
-                <Form.Check
-                    type='switch'
+            <strong className="me-1">Tags:</strong>
+            {_.map(allTags, tag => {
+                const selected = _.includes(selectedTags, tag.tag)
+                return <Badge
+                    key={tag.tag}
                     style={{
                         backgroundColor: tag.color
                     }}
-                    key={tag.tag}
-                    label={tag.tag}
-                    onChange={e => e.target.checked ? addTaskTag(tag.tag) : removeTaskTag(tag.tag)}
-                    checked={_.includes(selectedTags, tag.tag)}
-                />
-            ))}
+                    bg={selected || 'secondary'}
+                    onClick={() => selected ? removeTaskTag(tag.tag) : addTaskTag(tag.tag)}
+                >
+                    {tag.tag}</Badge>
+            })}
+
 
         </>
     )

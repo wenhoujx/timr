@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { useEffect, useState } from 'react'
-import { Button } from "react-bootstrap"
+import { Button, Form, InputGroup } from "react-bootstrap"
 import { formatTime } from '../utils/utils'
 
 function computeTimes(tags, getTime) {
@@ -25,31 +25,43 @@ export function TagList({ tags, getTagTime, addTag, removeTag }) {
     }
 
     return (
-        <div className='d-flex justify-content-start flex-wrap'
-        >
-            <Button
-                className='bi-arrow-clockwise'
-                size='sm' onClick={refreshTimes} />
-            <input
-                style={{ width: '7rem' }}
-                placeholder='+new tag'
-                value={value}
-                onChange={e => setValue(e.target.value)}
-                onKeyDown={(e) => { e.key === 'Enter' && addNewTag() }}
-            />
-            {_.map(times, ([tag, time]) => (
-                <div
-                    key={tag.tag}
-                    className='d-flex align-items-center p-0 rounded'
-                    style={{
-                        backgroundColor: tag.color
-                    }}
-                >
-                    <span className='px-1'>{tag.tag}: {formatTime(time)}</span>
-                    <Button size='sm' onClick={() => removeTag(tag.tag)}>x</Button>
-                </div>
+        <InputGroup size='sm'>
+            <div className='d-flex justify-content-start flex-wrap'
+            >
+                <Button
+                    size='sm'
+                    className='bi-arrow-clockwise'
+                    onClick={refreshTimes} />
+                <Form.Control
+                    className='p-0'
+                    style={{ width: '7rem' }}
+                    placeholder='+new tag'
+                    value={value}
+                    onChange={e => setValue(e.target.value)}
+                    onKeyDown={(e) => { e.key === 'Enter' && addNewTag() }}
+                />
+                {_.map(times, ([tag, time]) => (
+                    <div
+                        key={tag.tag}
+                        className='d-flex align-items-center p-0 rounded'
+                        style={{
+                            backgroundColor: tag.color
+                        }}
+                    >
+                        <span className='px-1'>{tag.tag}: {formatTime(time)}</span>
+                        <Button
+                            size='sm'
+                            className='bi-trash-fill border-0'
+                            style={{
+                                backgroundColor: tag.color
+                            }}
+                            onClick={() => removeTag(tag.tag)}
+                        />
+                    </div>
 
-            ))}
-        </div>
+                ))}
+            </div>
+
+        </InputGroup>
     )
 }
