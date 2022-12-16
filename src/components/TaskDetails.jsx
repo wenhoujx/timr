@@ -80,9 +80,9 @@ function Intervals({ task, updateTaskIntervals }) {
                 <Interval
                     key={i}
                     interval={dur}
-                    deleteInterval = {
+                    deleteInterval={
                         () => updateTaskIntervals(
-                            task.id, _.filter(task.intervals, (interval, j) => j !== i )
+                            task.id, _.filter(task.intervals, (interval, j) => j !== i)
                         )
                     }
                     updateInterval={
@@ -129,8 +129,9 @@ function Interval({ interval, updateInterval, deleteInterval }) {
         {
             !editing ? (
                 <>
-                    <i className="bi-x-circle-fill p-0 me-1" 
-                    onClick={() => deleteInterval()} />
+                    <i className="bi-x-circle-fill p-0 me-1"
+                    style={{color: 'red'}}
+                        onClick={() => deleteInterval()} />
                     <div className="d-inline" onDoubleClick={() => setEditing(true)}>
                         {formatInterval(interval)}
                     </div>
@@ -138,15 +139,19 @@ function Interval({ interval, updateInterval, deleteInterval }) {
 
             ) : (
                 <InputGroup onKeyDown={e => e.key === 'Enter' && handleEditing()}>
-
+                    <InputGroup.Text>Start</InputGroup.Text>
                     <Form.Control
                         size="sm"
                         value={startValue} onChange={e => setStartValue(e.target.value)} />
                     {end && (
-                        <Form.Control
-                            size="sm"
-                            placeholder={formatTimeInSeconds(end)}
-                            value={endValue} onChange={e => setEndValue(e.target.value)} />
+                        <>
+                            <InputGroup.Text>End</InputGroup.Text>
+                            <Form.Control
+                                size="sm"
+                                placeholder={formatTimeInSeconds(end)}
+                                value={endValue} onChange={e => setEndValue(e.target.value)} />
+                        </>
+
                     )}
                 </InputGroup>
             )
