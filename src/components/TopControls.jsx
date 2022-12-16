@@ -17,6 +17,7 @@ export function TopControls({ state, reset }) {
     return (
         <div className="d-flex">
             <Button
+            size="sm"
                 href={`data:text/json;charset=utf-8,${encodeURIComponent(
                     toJson(state)
                 )}`}
@@ -25,7 +26,9 @@ export function TopControls({ state, reset }) {
                 Export JSON
             </Button>
 
-            <Button className="ms-auto btn-danger" onClick={() => reset()} >Reset</Button>
+            <Button 
+            size="sm"
+            className="ms-auto btn-danger" onClick={() => reset()} >Reset</Button>
 
         </div>
     )

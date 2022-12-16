@@ -14,8 +14,10 @@ export function NewTask({ addTask }) {
     return (<InputGroup>
         <Button
             className="btn-success bi-play-fill"
+            size="sm"
             onClick={handleClick} />
-        <Form.Control
+        <Form.Control 
+        size="sm"
             placeholder="what's your plan?"
             onChange={(e) => setValue(e.target.value)}
             onKeyDown={(e) => { e.key === 'Enter' && handleClick() }}
