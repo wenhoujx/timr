@@ -10,7 +10,7 @@ function computeTimes(tags, getTime) {
 export function TagList({ tags, getTagTime, addTag, removeTag, updateTagColor }) {
     const [times, setTimes] = useState(computeTimes(tags, getTagTime))
     const [value, setValue] = useState('')
-    const [editing, setEditing] = useState(false)
+    const [editing, setEditing] = useState(-1)
     const addNewTag = () => {
         if (_.isEmpty(value)) {
             return
@@ -49,20 +49,21 @@ export function TagList({ tags, getTagTime, addTag, removeTag, updateTagColor })
                             backgroundColor: tag.color
                         }}
                     >
-                        {editing ? (
+                        {editing === tag.tag ? (
                             <Form.Control
                                 className='p-0'
                                 style={{ height: '31px' }}
                                 type="color"
                                 value={tag.color}
-                                onChange={e => { updateTagColor(tag.tag, e.target.value); setEditing(false) }}
-                                onBlur={() => setEditing(false)}
+                                onChange={e => { updateTagColor(tag.tag, e.target.value); setEditing(-1) }}
+                                onBlur={() => setEditing(-1)}
+                                autoFocus
                             />
                         ) : (
                             <span
                                 className='ps-1'
                                 style={{ backgroundColor: tag.color }}
-                                onDoubleClick={() => setEditing(true)}
+                                onDoubleClick={() => setEditing(tag.tag)}
                             >{tag.tag}:{formatTime(getTagTime(tag.tag))}</span>
 
                         )}
