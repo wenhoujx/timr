@@ -35,18 +35,17 @@ export function TaskDetails({ allTags, task, show, closeShow, addTaskTag, remove
                     </InputGroup>
                 </div>
                 <div className="d-grid mt-2">
-                    <Modal show={showDelete} onHide={() => setShowDelete(false)}
-                    >
-                        <Modal.Body>
-                            Delete {task.title}?
-                        </Modal.Body>
-                        <Modal.Footer>
+                    <Modal show={showDelete} onHide={() => setShowDelete(false)} >
+                        <Modal.Body className="d-flex align-items-center">
+                            <span>
+                                Delete <strong>{task.title}</strong>?
+                            </span>
                             <Button
+                                className="ms-auto bi-trash-fill"
+                                size="sm"
                                 variant="danger"
-                                onClick={() => { setShowDelete(false); removeTask() }}>
-                                Delete
-                            </Button>
-                        </Modal.Footer>
+                                onClick={() => { setShowDelete(false); removeTask() }} />
+                        </Modal.Body>
                     </Modal>
                     <Button
                         size="sm"

@@ -71,7 +71,8 @@ export function TagList({ tags, getTagTime, addTag, removeTag, updateTagColor })
                             size='sm'
                             className='bi-trash-fill border-0'
                             style={{
-                                backgroundColor: tag.color
+                                backgroundColor: tag.color, 
+                                color: 'black'
                             }}
                             onClick={() => removeTag(tag.tag)}
                         />

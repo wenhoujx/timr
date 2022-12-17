@@ -1,7 +1,7 @@
 import { useState, useReducer, useEffect } from 'react'
 import { Container } from 'react-bootstrap'
 import { NewTask } from './components/NewTask'
-import { toggleTaskStatus, newTask, updateTaskTitle, endTask, addTaskTag, removeTaskTag, getTagTime, newTag, updateTaskNotes, updateTaskIntervals, updateTagColor } from './utils/utils'
+import { toggleTaskStatus, newTask, updateTaskTitle, endTask, addTaskTag, removeTaskTag, getTagTime, newTag, updateTaskNotes, updateTaskIntervals, updateTagColor, isStopped } from './utils/utils'
 import _ from 'lodash'
 import { TaskList } from './components/TaskList'
 import { TagList } from './components/TagList'
@@ -34,10 +34,17 @@ function reducer(state, action) {
     case (ACTIONS.RESET):
       return init
     case (ACTIONS.ADD_TAG):
-      return {
-        ...state,
-        tags: _.find(state.tags, { tag: action.payload.tag }) ? state.tags : [...state.tags, newTag(action.payload.tag)]
+      if (_.find(state.tags, { tag: action.payload.tag })) {
+        // already exists 
+        return state
+      } else {
+        return {
+          ...state,
+          tasks: _.map(state.tasks, t => (isStopped(t) ? t : addTaskTag(t, action.payload.tag))),
+          tags: [...state.tags, newTag(action.payload.tag)]
+        }
       }
+
     case (ACTIONS.REMOVE_TAG):
       return {
         ...state,
