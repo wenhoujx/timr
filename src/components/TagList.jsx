@@ -7,9 +7,10 @@ function computeTimes(tags, getTime) {
     return _.sortBy(_.map(tags, tag => [tag, getTime(tag.tag)]), ([tag, time]) => -time)
 }
 
-export function TagList({ tags, getTagTime, addTag, removeTag }) {
+export function TagList({ tags, getTagTime, addTag, removeTag, updateTagColor }) {
     const [times, setTimes] = useState(computeTimes(tags, getTagTime))
     const [value, setValue] = useState('')
+    const [editing, setEditing] = useState(false)
     const addNewTag = () => {
         if (_.isEmpty(value)) {
             return
@@ -48,7 +49,23 @@ export function TagList({ tags, getTagTime, addTag, removeTag }) {
                             backgroundColor: tag.color
                         }}
                     >
-                        <span className='px-1'>{tag.tag}: {formatTime(time)}</span>
+                        {editing ? (
+                            <Form.Control
+                                className='p-0'
+                                style={{ height: '31px' }}
+                                type="color"
+                                value={tag.color}
+                                onChange={e => { updateTagColor(tag.tag, e.target.value); setEditing(false) }}
+                                onBlur={() => setEditing(false)}
+                            />
+                        ) : (
+                            <span
+                                className='ps-1'
+                                style={{ backgroundColor: tag.color }}
+                                onDoubleClick={() => setEditing(true)}
+                            >{tag.tag}:{formatTime(getTagTime(tag.tag))}</span>
+
+                        )}
                         <Button
                             size='sm'
                             className='bi-trash-fill border-0'

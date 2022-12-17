@@ -112,6 +112,12 @@ export function addTaskTag(task, tag) {
     }
 }
 
+export function updateTagColor(tag, color) {
+    return {
+        ...tag, 
+        color 
+    }
+}
 export function newTag(tag) {
     return {
         tag,

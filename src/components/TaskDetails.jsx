@@ -1,9 +1,10 @@
 import _ from "lodash";
 import { useState } from "react";
-import { Badge, Button, Col, Form, FormControl, InputGroup, Offcanvas, Row, } from "react-bootstrap";
+import { Badge, Button, Col, Form, FormControl, InputGroup, Offcanvas, Row, Modal } from "react-bootstrap";
 import { formatTime } from "../utils/utils";
 
 export function TaskDetails({ allTags, task, show, closeShow, addTaskTag, removeTaskTag, removeTask, updateTaskTitle, updateTaskNotes, updateTaskIntervals }) {
+    const [showDelete, setShowDelete] = useState(false)
     return (
         task &&
         <Offcanvas show={show} onHide={() => closeShow()} placement='end'>
@@ -34,10 +35,23 @@ export function TaskDetails({ allTags, task, show, closeShow, addTaskTag, remove
                     </InputGroup>
                 </div>
                 <div className="d-grid mt-2">
+                    <Modal show={showDelete} onHide={() => setShowDelete(false)}
+                    >
+                        <Modal.Body>
+                            Delete {task.title}?
+                        </Modal.Body>
+                        <Modal.Footer>
+                            <Button
+                                variant="danger"
+                                onClick={() => { setShowDelete(false); removeTask() }}>
+                                Delete
+                            </Button>
+                        </Modal.Footer>
+                    </Modal>
                     <Button
                         size="sm"
                         className="btn-danger bi-trash-fill"
-                        onClick={() => removeTask()}
+                        onClick={() => setShowDelete(true)}
                     />
                 </div>
 
@@ -92,14 +106,13 @@ function getEpochSeconds(base, timeString) {
 }
 
 function isValidTime(timeString) {
-    const [hh, mm] = _.map(timeString.split(':'), t=>parseInt(t))
-    return (23 >= hh) && (hh  >= 0) && (59 >= mm) && (mm >= 0)
+    const [hh, mm] = _.map(timeString.split(':'), t => parseInt(t))
+    return (23 >= hh) && (hh >= 0) && (59 >= mm) && (mm >= 0)
 }
 
 
 function Interval({ interval, updateInterval, deleteInterval }) {
     const { start, end, elapsed } = interval
-    const [editing, setEditing] = useState(false)
     const [startValue, setStartValue] = useState(secondsToString(start))
     const [endValue, setEndValue] = useState(end ? secondsToString(end) : null)
 
@@ -110,7 +123,6 @@ function Interval({ interval, updateInterval, deleteInterval }) {
         if (endValue && !isValidTime(endValue)) {
             return
         }
-        setEditing(false)
         const startSeconds = getEpochSeconds(start, startValue)
         const endSeconds = end ? getEpochSeconds(end, endValue) : null
         updateInterval({
@@ -148,38 +160,7 @@ function Interval({ interval, updateInterval, deleteInterval }) {
                         </>
                     ) : ' Running'}
                 </Row>
-
-
             </div>
-
-            // !editing ? (
-            //     <>
-            //         <i />
-            //         <div className="d-inline" onDoubleClick={() => setEditing(true)}>
-            //             {startValue + (endValue ? ` - ${endValue}` : '') + (elapsed ? `: ${formatTime(elapsed)}` : '')}
-            //         </div>
-            //     </>
-
-            // ) : (
-            //     <InputGroup onKeyDown={e => e.key === 'Enter' && handleEditing()}>
-            //         <InputGroup.Text>Start</InputGroup.Text>
-            //         <Form.Control
-            //             size="sm"
-            //             value={startValue} onChange={e => setStartValue(e.target.value)} />
-
-
-            //         {end && (
-            //             <>
-            //                 <InputGroup.Text>End</InputGroup.Text>
-            //                 <Form.Control
-            //                     size="sm"
-            //                     placeholder={formatTimeInSeconds(end)}
-            //                     value={endValue} onChange={e => setEndValue(e.target.value)} />
-            //             </>
-
-            //         )}
-            //     </InputGroup>
-            // )
         }
     </div>
 }

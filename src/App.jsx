@@ -1,7 +1,7 @@
 import { useState, useReducer, useEffect } from 'react'
 import { Container } from 'react-bootstrap'
 import { NewTask } from './components/NewTask'
-import { toggleTaskStatus, newTask, updateTaskTitle, endTask, addTaskTag, removeTaskTag, getTagTime, newTag, updateTaskNotes, updateTaskIntervals } from './utils/utils'
+import { toggleTaskStatus, newTask, updateTaskTitle, endTask, addTaskTag, removeTaskTag, getTagTime, newTag, updateTaskNotes, updateTaskIntervals, updateTagColor } from './utils/utils'
 import _ from 'lodash'
 import { TaskList } from './components/TaskList'
 import { TagList } from './components/TagList'
@@ -19,11 +19,12 @@ const ACTIONS = {
   REMOVE_TASK: 'remove_task',
   UPDATE_TASK_TITLE: 'update_task_title',
   UPDATE_TASK_NOTES: 'update_task_notes',
-  UPDATE_TASK_INTERVALS: 'udpate_task_intervals', 
+  UPDATE_TASK_INTERVALS: 'udpate_task_intervals',
   TOGGLE_TASK_STATUS: 'toggle_task_status',
   ADD_TAG: 'add_tag',
   REMOVE_TAG: 'remove_tag',
   UPDATE_TAG: "udpate_tag",
+  UPDATE_TAG_COLOR: 'update_tag_color',
   ADD_TASK_TAG: 'add_task_tag',
   REMOVE_TASK_TAG: 'remove_task_tag',
 }
@@ -45,6 +46,11 @@ function reducer(state, action) {
       }
     case (ACTIONS.UPDATE_TAG):
       return {}
+    case (ACTIONS.UPDATE_TAG_COLOR):
+      return {
+        ...state,
+        tags: _.map(state.tags, t => t.tag === action.payload.tag ? updateTagColor(t, action.payload.color) : t)
+      }
     case (ACTIONS.ADD_TASK_TAG):
       return {
         ...state,
@@ -176,10 +182,10 @@ function App() {
             id, notes
           }
         })}
-        updateTaskIntervals = {(id, intervals) => dispatch({
-          type: ACTIONS.UPDATE_TASK_INTERVALS, 
+        updateTaskIntervals={(id, intervals) => dispatch({
+          type: ACTIONS.UPDATE_TASK_INTERVALS,
           payload: {
-            id, intervals 
+            id, intervals
           }
         })}
       />
@@ -189,6 +195,11 @@ function App() {
           addTag={tag => dispatch({ type: ACTIONS.ADD_TAG, payload: { tag } })}
           removeTag={tag => dispatch({ type: ACTIONS.REMOVE_TAG, payload: { tag } })}
           getTagTime={tag => getTagTime(state.tasks, tag)}
+          updateTagColor={((tag, color) => dispatch({
+            type: ACTIONS.UPDATE_TAG_COLOR, payload: {
+              tag, color
+            }
+          }))}
         />
       </div>
       <div className='mb-2'>
@@ -203,10 +214,6 @@ function App() {
             setShowDetails(true)
           }}
           onToggleStatus={id => dispatch({ type: ACTIONS.TOGGLE_TASK_STATUS, payload: { id } })}
-          removeTask={id => dispatch({ type: ACTIONS.REMOVE_TASK, payload: { id } })}
-          updateTaskTitle={(id, title) => dispatch({
-            type: ACTIONS.UPDATE_TASK_TITLE, payload: { id, title }
-          })}
         />
       </div>
     </Container>
