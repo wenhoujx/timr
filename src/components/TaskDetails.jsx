@@ -1,34 +1,7 @@
 import _ from "lodash";
 import { useState } from "react";
-import { Badge, Button, Form, FormControl, InputGroup, Offcanvas, } from "react-bootstrap";
+import { Badge, Button, Col, Form, FormControl, InputGroup, Offcanvas, Row, } from "react-bootstrap";
 import { formatTime } from "../utils/utils";
-
-
-function formatTimeInSeconds(seconds) {
-    const padTo2 = str => _.padStart(str, 2, '0')
-    const endD = new Date(seconds * 1000)
-    return `${padTo2(endD.getHours())}:${padTo2(endD.getMinutes())}`
-}
-
-function formatInterval(interval) {
-    const { start, end, elapsed } = interval
-    const padTo2 = str => _.padStart(str, 2, '0')
-    let formatString = ""
-    const startD = new Date(start * 1000)
-    formatString = `${padTo2(startD.getHours())}:${padTo2(startD.getMinutes())}`
-    if (end) {
-        const endD = new Date(end * 1000)
-        formatString += ` - ${padTo2(endD.getHours())}:${padTo2(endD.getMinutes())}`
-    } else {
-        formatString += ' - running'
-    }
-    if (elapsed) {
-        formatString += ` total: ${formatTime(elapsed)}`
-    }
-    return formatString
-}
-
-
 
 export function TaskDetails({ allTags, task, show, closeShow, addTaskTag, removeTaskTag, removeTask, updateTaskTitle, updateTaskNotes, updateTaskIntervals }) {
     return (
@@ -104,23 +77,42 @@ function Intervals({ task, updateTaskIntervals }) {
     )
 }
 
-function getEpochSeconds(base, hh, mm) {
+function secondsToString(seconds) {
+    const padTo2 = str => _.padStart(str, 2, '0')
+    const d = new Date(seconds * 1000)
+    return `${padTo2(d.getHours())}:${padTo2(d.getMinutes())}`
+}
+
+function getEpochSeconds(base, timeString) {
     const d = new Date(base * 1000)
+    const [hh, mm] = _.map(timeString.split(":"), t => parseInt(t))
     d.setHours(hh)
     d.setMinutes(mm)
     return _.floor(d.getTime() / 1000)
-
 }
+
+function isValidTime(timeString) {
+    const [hh, mm] = _.map(timeString.split(':'), t=>parseInt(t))
+    return (23 >= hh) && (hh  >= 0) && (59 >= mm) && (mm >= 0)
+}
+
+
 function Interval({ interval, updateInterval, deleteInterval }) {
     const { start, end, elapsed } = interval
     const [editing, setEditing] = useState(false)
-    const [startValue, setStartValue] = useState(formatTimeInSeconds(start))
-    const [endValue, setEndValue] = useState(end ? formatTimeInSeconds(end) : null)
+    const [startValue, setStartValue] = useState(secondsToString(start))
+    const [endValue, setEndValue] = useState(end ? secondsToString(end) : null)
 
     const handleEditing = () => {
+        if (!isValidTime(startValue)) {
+            return
+        }
+        if (endValue && !isValidTime(endValue)) {
+            return
+        }
         setEditing(false)
-        const startSeconds = getEpochSeconds(start, ...startValue.split(':'))
-        const endSeconds = end ? getEpochSeconds(end, ...endValue.split(':')) : null
+        const startSeconds = getEpochSeconds(start, startValue)
+        const endSeconds = end ? getEpochSeconds(end, endValue) : null
         updateInterval({
             start: startSeconds,
             end: endSeconds,
@@ -129,34 +121,65 @@ function Interval({ interval, updateInterval, deleteInterval }) {
     }
     return <div>
         {
-            !editing ? (
-                <>
-                    <i className="bi-x-circle-fill p-0 me-1"
-                        style={{ color: 'red' }}
-                        onClick={() => deleteInterval()} />
-                    <div className="d-inline" onDoubleClick={() => setEditing(true)}>
-                        {formatInterval(interval)}
-                    </div>
-                </>
-
-            ) : (
-                <InputGroup onKeyDown={e => e.key === 'Enter' && handleEditing()}>
-                    <InputGroup.Text>Start</InputGroup.Text>
-                    <Form.Control
-                        size="sm"
-                        value={startValue} onChange={e => setStartValue(e.target.value)} />
-                    {end && (
+            <div onBlur={() => handleEditing()}>
+                <Row className="d-flex align-items-center">
+                    <Col sm={1}>
+                        <i className="bi-x-circle-fill p-0 me-1"
+                            style={{ color: 'red' }}
+                            onClick={() => deleteInterval()} />
+                    </Col>
+                    <Col sm={2} className='p-0 flex-grow-0'>
+                        <Form.Control
+                            className={isValidTime(startValue) || 'border-danger'}
+                            value={startValue}
+                            onChange={e => setStartValue(e.target.value)} />
+                    </Col>
+                    --
+                    {endValue ? (
                         <>
-                            <InputGroup.Text>End</InputGroup.Text>
-                            <Form.Control
-                                size="sm"
-                                placeholder={formatTimeInSeconds(end)}
-                                value={endValue} onChange={e => setEndValue(e.target.value)} />
-                        </>
+                            <Col sm={2} className='p-0 flex-grow-0'>
+                                <Form.Control
+                                    className={isValidTime(endValue) || 'border-danger'}
+                                    value={endValue}
+                                    onChange={e => setEndValue(e.target.value)} />
+                            </Col>
+                            Total: {formatTime(elapsed)}
 
-                    )}
-                </InputGroup>
-            )
+                        </>
+                    ) : ' Running'}
+                </Row>
+
+
+            </div>
+
+            // !editing ? (
+            //     <>
+            //         <i />
+            //         <div className="d-inline" onDoubleClick={() => setEditing(true)}>
+            //             {startValue + (endValue ? ` - ${endValue}` : '') + (elapsed ? `: ${formatTime(elapsed)}` : '')}
+            //         </div>
+            //     </>
+
+            // ) : (
+            //     <InputGroup onKeyDown={e => e.key === 'Enter' && handleEditing()}>
+            //         <InputGroup.Text>Start</InputGroup.Text>
+            //         <Form.Control
+            //             size="sm"
+            //             value={startValue} onChange={e => setStartValue(e.target.value)} />
+
+
+            //         {end && (
+            //             <>
+            //                 <InputGroup.Text>End</InputGroup.Text>
+            //                 <Form.Control
+            //                     size="sm"
+            //                     placeholder={formatTimeInSeconds(end)}
+            //                     value={endValue} onChange={e => setEndValue(e.target.value)} />
+            //             </>
+
+            //         )}
+            //     </InputGroup>
+            // )
         }
     </div>
 }
