@@ -181,7 +181,11 @@ function TimeEditor({ hour, minute, updateValue }) {
                 overlay={
                     <Popover>
                         <Popover.Body
-                        className="p-1">
+                        className="p-1"
+                        style={{
+                            width: "4rem"
+                        }}
+                        >
                             <Form.Control 
                             size="sm"
                                 className={isValid(value) ? "" : "border-danger"}
