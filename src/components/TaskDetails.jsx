@@ -1,13 +1,17 @@
-import _ from "lodash";
+import _, { min } from "lodash";
 import { useState } from "react";
-import { Badge, Button, Col, Form, FormControl, InputGroup, Offcanvas, Row, Modal } from "react-bootstrap";
+import { Badge, Button, Col, Form, FormControl, InputGroup, Offcanvas, Row, Modal, OverlayTrigger, Popover } from "react-bootstrap";
 import { formatTime } from "../utils/utils";
 
 export function TaskDetails({ allTags, task, show, closeShow, addTaskTag, removeTaskTag, removeTask, updateTaskTitle, updateTaskNotes, updateTaskIntervals }) {
     const [showDelete, setShowDelete] = useState(false)
     return (
         task &&
-        <Offcanvas show={show} onHide={() => closeShow()} placement='end'>
+        <Offcanvas
+            // for input popover to work 
+            enforceFocus={false}
+            show={show}
+            onHide={() => closeShow()} placement='end'>
             <Offcanvas.Body>
                 <strong>Title:</strong>
                 <InputGroup size="sm">
@@ -35,7 +39,9 @@ export function TaskDetails({ allTags, task, show, closeShow, addTaskTag, remove
                     </InputGroup>
                 </div>
                 <div className="d-grid mt-2">
-                    <Modal show={showDelete} onHide={() => setShowDelete(false)} >
+                    <Modal
+                        show={showDelete}
+                        onHide={() => setShowDelete(false)} >
                         <Modal.Body className="d-flex align-items-center">
                             <span>
                                 Delete <strong>{task.title}</strong>?
@@ -90,81 +96,110 @@ function Intervals({ task, updateTaskIntervals }) {
     )
 }
 
-function secondsToString(seconds) {
-    const padTo2 = str => _.padStart(str, 2, '0')
+function parseSeconds(seconds) {
     const d = new Date(seconds * 1000)
-    return `${padTo2(d.getHours())}:${padTo2(d.getMinutes())}`
+    return {
+        hour: d.getHours(),
+        minute: d.getMinutes()
+    }
 }
 
-function getEpochSeconds(base, timeString) {
+function getEpochSeconds(base, hour, minute) {
     const d = new Date(base * 1000)
-    const [hh, mm] = _.map(timeString.split(":"), t => parseInt(t))
-    d.setHours(hh)
-    d.setMinutes(mm)
+    d.setHours(hour)
+    d.setMinutes(minute)
     return _.floor(d.getTime() / 1000)
 }
 
-function isValidTime(timeString) {
-    const [hh, mm] = _.map(timeString.split(':'), t => parseInt(t))
-    return (23 >= hh) && (hh >= 0) && (59 >= mm) && (mm >= 0)
-}
-
-
 function Interval({ interval, updateInterval, deleteInterval }) {
     const { start, end, elapsed } = interval
-    const [startValue, setStartValue] = useState(secondsToString(start))
-    const [endValue, setEndValue] = useState(end ? secondsToString(end) : null)
+    const startValue = parseSeconds(start)
+    const endValue = end && parseSeconds(end)
 
-    const handleEditing = () => {
-        if (!isValidTime(startValue)) {
-            return
-        }
-        if (endValue && !isValidTime(endValue)) {
-            return
-        }
-        const startSeconds = getEpochSeconds(start, startValue)
-        const endSeconds = end ? getEpochSeconds(end, endValue) : null
-        updateInterval({
-            start: startSeconds,
-            end: endSeconds,
-            elapsed: endSeconds ? endSeconds - startSeconds : null
-        })
+    const handleUpdate = (s, e) => {
+        const new_start = getEpochSeconds(start, s.hour, s.minute)
+        const new_end = end ? getEpochSeconds(end, e.hour, e.minute) : null
+        updateInterval(
+            {
+                start: new_start,
+                end: new_end,
+                elapsed: new_end ? new_end - new_start : null
+            }
+        )
     }
     return <div>
         {
-            <div onBlur={() => handleEditing()}>
-                <Row className="d-flex align-items-center">
-                    <Col sm={1}>
-                        <i className="bi-x-circle-fill p-0 me-1"
-                            style={{ color: 'red' }}
-                            onClick={() => deleteInterval()} />
-                    </Col>
-                    <Col sm={2} className='p-0 flex-grow-0'>
-                        <Form.Control
-                            className={isValidTime(startValue) || 'border-danger'}
-                            value={startValue}
-                            onChange={e => setStartValue(e.target.value)} />
-                    </Col>
-                    --
-                    {endValue ? (
-                        <>
-                            <Col sm={2} className='p-0 flex-grow-0'>
-                                <Form.Control
-                                    className={isValidTime(endValue) || 'border-danger'}
-                                    value={endValue}
-                                    onChange={e => setEndValue(e.target.value)} />
-                            </Col>
-                            Total: {formatTime(elapsed)}
+            <div>
+                <i className="bi-x-circle-fill p-0 me-1"
+                    style={{ color: 'red' }}
+                    onClick={() => deleteInterval()} />
+                <TimeEditor
+                    {...startValue}
+                    updateValue={val => handleUpdate(val, endValue)}
+                />
+                --
+                {endValue ? (
+                    <>
+                        <div className="d-inline me-2">
+                            <TimeEditor
+                                {...endValue}
+                                updateValue={val => handleUpdate(startValue, val)}
+                            />
+                        </div>
+                        Total: {formatTime(elapsed)}
+                    </>
 
-                        </>
-                    ) : ' Running'}
-                </Row>
+                ) : ' Running'}
             </div>
         }
     </div>
 }
 
+function TimeEditor({ hour, minute, updateValue }) {
+    const pad2 = i => String(i).padStart(2, '0')
+    const isValid = ts => {
+        const [h, m] = _.map(ts.split(":"), t => parseInt(t))
+        return (h >= 0) && (h <= 23) && (m >= 0) && (m <= 59)
+    }
+    const parseString = (ts) => {
+        const [h, m] = _.map(ts.split(":"), t => parseInt(t))
+        return {
+            hour: h,
+            minute: m
+        }
+    }
+    const timeAsString = pad2(hour) + ":" + pad2(minute)
+    const [value, setValue] = useState(timeAsString)
+
+    return (
+        <>
+            <OverlayTrigger
+                trigger="click"
+                placement='bottom'
+                rootClose
+                onExit={e => isValid(value) ? updateValue(parseString(value)) : setValue(timeAsString)}
+                overlay={
+                    <Popover>
+                        <Popover.Body
+                        className="p-1">
+                            <Form.Control 
+                            size="sm"
+                                className={isValid(value) ? "" : "border-danger"}
+                                type='text'
+                                value={value}
+                                onChange={e => setValue(e.target.value)}
+                            />
+                        </Popover.Body>
+                    </Popover>
+                }
+            >
+                <span>{value}</span>
+            </OverlayTrigger>
+        </>
+    )
+}
 function Tags({ allTags, selectedTags, addTaskTag, removeTaskTag }) {
+
     return (
         <>
             <strong className="me-1">Tags:</strong>
