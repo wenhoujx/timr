@@ -18,7 +18,7 @@ export function NewTask({ addTask }) {
             onClick={handleClick} />
         <Form.Control 
         size="sm"
-            placeholder="what's your plan?"
+            placeholder="doing what?"
             onChange={(e) => setValue(e.target.value)}
             onKeyDown={(e) => { e.key === 'Enter' && handleClick() }}
             value={value}
