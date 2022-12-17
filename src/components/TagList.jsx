@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import { useEffect, useState } from 'react'
-import { Button, Form, InputGroup } from "react-bootstrap"
+import { Button, Form, InputGroup, OverlayTrigger, Popover } from "react-bootstrap"
+import { SketchPicker, SliderPicker } from 'react-color'
 import { formatTime } from '../utils/utils'
 
 function computeTimes(tags, getTime) {
@@ -49,29 +50,34 @@ export function TagList({ tags, getTagTime, addTag, removeTag, updateTagColor })
                             backgroundColor: tag.color
                         }}
                     >
-                        {editing === tag.tag ? (
-                            <Form.Control
-                                className='p-0'
-                                style={{ height: '31px' }}
-                                type="color"
-                                value={tag.color}
-                                onChange={e => { updateTagColor(tag.tag, e.target.value); setEditing(-1) }}
-                                onBlur={() => setEditing(-1)}
-                                autoFocus
-                            />
-                        ) : (
+                        <OverlayTrigger
+                            trigger="click"
+                            placement={'bottom'}
+                            rootClose
+                            overlay={
+                                <Popover
+                                    style={{ width: '15rem' }}
+                                    >
+                                    <Popover.Body>
+                                        <SliderPicker
+                                            color={tag.color}
+                                            onChangeComplete={color => { updateTagColor(tag.tag, color.hex); setEditing(-1) }}
+                                        />
+                                    </Popover.Body>
+                                </Popover>
+                            }
+                        >
                             <span
                                 className='ps-1'
                                 style={{ backgroundColor: tag.color }}
                                 onDoubleClick={() => setEditing(tag.tag)}
-                            >{tag.tag}:{formatTime(getTagTime(tag.tag))}</span>
-
-                        )}
+                            >{tag.tag}:{formatTime(time)}</span>
+                        </OverlayTrigger>
                         <Button
                             size='sm'
                             className='bi-trash-fill border-0'
                             style={{
-                                backgroundColor: tag.color, 
+                                backgroundColor: tag.color,
                                 color: 'black'
                             }}
                             onClick={() => removeTag(tag.tag)}
@@ -81,6 +87,6 @@ export function TagList({ tags, getTagTime, addTag, removeTag, updateTagColor })
                 ))}
             </div>
 
-        </InputGroup>
+        </InputGroup >
     )
 }
