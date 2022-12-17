@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { useEffect, useState } from 'react'
 import { Button, Form, InputGroup, OverlayTrigger, Popover } from "react-bootstrap"
-import { SketchPicker, SliderPicker } from 'react-color'
+import { SliderPicker } from 'react-color'
 import { formatTime } from '../utils/utils'
 
 function computeTimes(tags, getTime) {
@@ -31,17 +31,29 @@ export function TagList({ tags, getTagTime, addTag, removeTag, updateTagColor })
             <div className='d-flex justify-content-start flex-wrap'
             >
                 <Button
+                    className='d-flex align-items-center'
                     size='sm'
-                    className='bi-arrow-clockwise'
-                    onClick={refreshTimes} />
+                    style={{ height: '26px' }}
+                    onClick={refreshTimes} >
+                    <i className='bi-arrow-clockwise' />
+                </Button>
                 <Form.Control
                     className='p-0'
-                    style={{ width: '7rem' }}
+                    style={{
+                        width: '7rem',
+                    }}
                     placeholder='+new tag'
                     value={value}
                     onChange={e => setValue(e.target.value)}
                     onKeyDown={(e) => { e.key === 'Enter' && addNewTag() }}
                 />
+                <div
+                    className='d-flex align-items-center px-1 bg-info rounded'
+
+                >
+                    Total: {formatTime(_.sum(_.map(times, t => t[1])))}
+                </div>
+
                 {_.map(times, ([tag, time]) => (
                     <div
                         key={tag.tag}
@@ -57,7 +69,7 @@ export function TagList({ tags, getTagTime, addTag, removeTag, updateTagColor })
                             overlay={
                                 <Popover
                                     style={{ width: '15rem' }}
-                                    >
+                                >
                                     <Popover.Body>
                                         <SliderPicker
                                             color={tag.color}
@@ -75,7 +87,7 @@ export function TagList({ tags, getTagTime, addTag, removeTag, updateTagColor })
                         </OverlayTrigger>
                         <Button
                             size='sm'
-                            className='bi-trash-fill border-0'
+                            className='bi-trash-fill border-0 p-0 pe-1'
                             style={{
                                 backgroundColor: tag.color,
                                 color: 'black'
