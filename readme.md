@@ -3,4 +3,12 @@
 ```sh
 yarn add ... 
 yarn dev 
+
+```
+
+## deploy
+
+```sh
+yarn build
+firebase deploy 
 ```
