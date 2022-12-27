@@ -8,7 +8,10 @@ import { TagList } from './components/TagList'
 import { TaskDetails } from './components/TaskDetails'
 import { TopControls } from './components/TopControls'
 import { init } from './data/initialData'
+import { db } from './fire';
+import { setDoc, doc, getDoc } from 'firebase/firestore/lite'
 
+const firebaseDocId = 'test-id'
 const TODO_APP = "todo_app"
 const TASKS = 'tasks'
 const tags = "tags"
@@ -19,18 +22,21 @@ const ACTIONS = {
   REMOVE_TASK: 'remove_task',
   UPDATE_TASK_TITLE: 'update_task_title',
   UPDATE_TASK_NOTES: 'update_task_notes',
-  UPDATE_TASK_INTERVALS: 'udpate_task_intervals',
+  UPDATE_TASK_INTERVALS: 'update_task_intervals',
   TOGGLE_TASK_STATUS: 'toggle_task_status',
   ADD_TAG: 'add_tag',
   REMOVE_TAG: 'remove_tag',
-  UPDATE_TAG: "udpate_tag",
+  UPDATE_TAG: "update_tag",
   UPDATE_TAG_COLOR: 'update_tag_color',
   ADD_TASK_TAG: 'add_task_tag',
   REMOVE_TASK_TAG: 'remove_task_tag',
+  SET_STATE: 'set_state'
 }
 
 function reducer(state, action) {
   switch (action.type) {
+    case (ACTIONS.SET_STATE):
+      return action.payload
     case (ACTIONS.RESET):
       return init
     case (ACTIONS.ADD_TAG):
@@ -139,13 +145,34 @@ function reducer(state, action) {
   }
 }
 
+
 function App() {
-  const [state, dispatch] = useReducer(reducer, JSON.parse(localStorage.getItem(TODO_APP)) || init)
+  const [state, dispatch] = useReducer(reducer, {})
   const [showDetails, setShowDetails] = useState(false)
   const [currentTaskId, setCurrentTaskId] = useState(null)
 
   useEffect(() => {
-    localStorage.setItem(TODO_APP, JSON.stringify(state))
+    (async () => {
+      const initialData = (await getDoc(doc(db, 'tasks', firebaseDocId)))
+      if (initialData.exists()) {
+        console.log(JSON.stringify(initialData.data()))
+        dispatch({
+          type: ACTIONS.SET_STATE,
+          payload: initialData.data()
+        })
+      } else {
+        dispatch({
+          type: ACTIONS.SET_STATE,
+          payload: init
+        })
+      }
+
+    })()
+  }, [])
+
+  useEffect(() => {
+    localStorage.setItem(TODO_APP, JSON.stringify(state));
+    (async () => setDoc(doc(db, "tasks", firebaseDocId), state))();
   }, [state])
 
   return (
